@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SimulationEngine.Events.Payloads
 {
-    internal class EventPayload 
+    public class EventPayload 
     {
-        public bool Canceled { get; set; }
+        public bool Cancelled { get; set; }
     }
 }

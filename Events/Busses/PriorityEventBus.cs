@@ -17,6 +17,15 @@ namespace SimulationEngine.Events.Busses
                 _channels[eventType] = new();
         }
 
+        public bool ClearChannel(ESimulationEvent eventType)
+        {
+            if (!_channels.TryGetValue(eventType, out var list))
+                return false;
+
+            list.Clear();
+            return true;
+        }
+
         public bool RemoveChannel(ESimulationEvent eventType)
         {
             return _channels.Remove(eventType);
@@ -24,9 +33,9 @@ namespace SimulationEngine.Events.Busses
 
         /// <summary>
         /// Adds the given Action to the invocation list.
-        /// Actions with the save priority are LIFO ordered
+        /// Actions with the same priority are LIFO ordered
         /// </summary>
-        public bool AddListener(ESimulationEvent eventType, Action<EventPayload> callback, int priority = 0, bool enforceEventCreation = false)
+        public bool AddListener(ESimulationEvent eventType, EventCallback<EventPayload> callback, int priority = 0, bool enforceEventCreation = false)
         {
             if (!_channels.TryGetValue(eventType, out var list))
             {
@@ -36,28 +45,43 @@ namespace SimulationEngine.Events.Busses
                 RegisterChannel(eventType);
             }
 
-            // insert in sorted position — O(n) but list stays ordered
-            // so Raise() never needs to sort
             int i = 0;
-            while (i < list.Count && list[i].Priority <= priority) i++;
-            list.Insert(i, listener);
+            for (; i < list.Count && list[i].Priority < priority; i++);
+            list.Insert(i, callback);
 
             return true;
         }
 
-        public bool Raise(ESimulationEvent eventType, EventPayload payload)
+        public bool RemoveListener(ESimulationEvent eventType, EventCallback<EventPayload> callback)
         {
-            throw new NotImplementedException();
+            if (!_channels.TryGetValue(eventType, out var list))
+                return false;
+
+            int removed = list.RemoveAll(l => l == callback);
+            return removed > 0;
         }
 
-        public bool RemoveAllForListener(ESimulationEvent Listener)
+        public int Raise(ESimulationEvent eventType, EventPayload payload)
         {
-            throw new NotImplementedException();
+            if (!_channels.TryGetValue(eventType, out var list))
+                return -1;
+
+            var snapshot = list.ToArray();
+            int invocations = 0;
+
+            foreach (var listener in snapshot)
+            {
+                if (payload.Cancelled) break;
+
+                listener.Handle(payload);
+                invocations++;
+
+                if (listener.IsOneShot)
+                    list.Remove(listener);
+            }
+
+            return invocations;
         }
 
-        public bool RemoveListener(ESimulationEvent Listener, Action<EventPayload> callback)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

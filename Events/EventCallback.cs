@@ -5,10 +5,17 @@ using System.Text;
 
 namespace SimulationEngine.Events
 {
-    public struct EventCallback<P>
+    public class EventCallback<P>
     {
-        public int priority;
-        public Action<P> handler;
-        public bool isOneShot;
+        public int Priority { get; }
+        public Action<EventPayload> Handle { get; }
+        public bool IsOneShot { get; }
+
+        public EventCallback(Action<EventPayload> handle, int priority = 0, bool isOneShot = false)
+        {
+            Priority = priority;
+            Handle = handle;
+            IsOneShot = isOneShot;
+        }
     }
 }
