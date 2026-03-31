@@ -8,8 +8,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\Shapes\Simple\Lines\Vertical\" />
 	  <Folder Include="Source\Factories\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\Shapes.json" />
+	</ItemGroup>
+		
+	
+	<ItemGroup>
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 
     

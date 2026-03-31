@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../ConsoleTesting/ConsoleTesting.csproj" Id="e0f1a130-5bab-4811-92cb-a5f0e401f96c" />
   <Project Path="SimulationEngine.csproj" />
 </Solution>
