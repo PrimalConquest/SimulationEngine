@@ -17,17 +17,13 @@ namespace SimulationEngine.Source.Helpers
                 {
                     string json = sr.ReadToEnd();
 
-                    List<ShapeInfo>? array = JsonConvert.DeserializeObject<List<ShapeInfo>>(json);
+                    Dictionary<string, string[]>? shapeMap = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(json);
 
-                    if (array == null) return null;
+                    if (shapeMap == null) return null;
 
-                    foreach (var shape in array)
-                    {
-                        if (shape.id == id) return shape.pattern;
-                    }
+                    return shapeMap[id];
                 }
             }
-            return null;
         }
 
     }

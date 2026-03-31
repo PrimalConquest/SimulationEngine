@@ -4,8 +4,9 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Geometry
 {
-    internal struct Shape
+    public struct Shape
     {
+
         ///<summary>
         ///Ancher point must be the leftmost point on the bottom row of the shape
         ///</summary>

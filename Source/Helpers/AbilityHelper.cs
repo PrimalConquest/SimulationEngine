@@ -4,9 +4,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Helpers
 {
-    internal class ShapeInfo
+    internal class AbilityHelper
     {
-        public string? id { get; set; }
-        public string[]? pattern { get; set; }
     }
 }

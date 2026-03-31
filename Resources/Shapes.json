@@ -1,191 +1,107 @@
 {
-  "shapes": [
-
-    {
-      "id": "Tile",
-      "description": "Standard 1x1 troop",
-      "pattern": [
-        "X"
-      ]
-    },
-
-    // \/============================ Lines ==================================
-    //────────────────────────── Horisontal ──────────────────────────────────
-    {
-      "id": "Line_Horisontal_2",
-      "description": "1 row, 2 columns — wide elite",
-      "pattern": [
-        "XX"
-      ]
-    },
-    //────────────────────────── Vetrical ────────────────────────────────────
-    {
-      "id": "Line_Vertical_2",
-      "description": "2 rows, 1 column — tall elite",
-      "pattern": [
-        "X",
-        "X"
-      ]
-    },
-    // /\========================= Lines =====================================
-
-    // \/========================= Squares ===================================
-    {
-      "id": "Square_2",
-      "description": "2x2 square — standard large hero",
-      "pattern": [
-        "XX",
-        "XX"
-      ]
-    },
-
-    {
-      "id": "Square_3",
-      "description": "3x3 square — standard large hero",
-      "pattern": [
-        "XXX",
-        "XXX",
-        "XXX"
-      ]
-    },
-    // /\========================= Squares ===================================
-
-    // \/======================= Rectangles ==================================
-    {
-      "id": "Rectangle_3x2",
-      "description": "2 rows, 3 columns",
-      "pattern": [
-        "XXX",
-        "XXX"
-      ]
-    },
-    {
-      "id": "Rectangle_2x3",
-      "description": "3 rows, 2 columns",
-      "pattern": [
-        "XX",
-        "XX",
-        "XX"
-      ]
-    },
-
-    // ── L shapes (2 cells tall stem, 1 cell wide foot) ───────────────────
-    {
-      "id": "L_1x1_BottomLeft",
-      "description": "L — stem goes up, foot goes right",
-      "pattern": [
-        "X_",
-        "XX"
-      ]
-    },
-    {
-      "id": "L_1x1_TopLeft",
-      "description": "L rotated 90° clockwise — stem goes right, foot goes down",
-      "pattern": [
-        "XX",
-        "X_"
-      ]
-    },
-    {
-      "id": "L_1x1_TopRight",
-      "description": "L rotated 180° — stem goes down, foot goes left",
-      "pattern": [
-        "XX",
-        "_X"
-      ]
-    },
-    {
-      "id": "L_1x1_BottomRight",
-      "description": "L rotated 270° (ccw 90°) — stem goes left, foot goes up",
-      "pattern": [
-        "_X",
-        "XX"
-      ]
-    },
-
-    // ── Big L (3 long stem, 2 wide foot) ─────────────────────────────────
-    {
-      "id": "L_2x1_BottomLeft",
-      "description": "Big L — 3 tall stem, foot extends right",
-      "pattern": [
-        "X_",
-        "X_",
-        "XX"
-      ]
-    },
-    {
-      "id": "L_2x1_TopLeft",
-      "description": "Big L rotated 90° clockwise",
-      "pattern": [
-        "XXX",
-        "X__"
-      ]
-    },
-    {
-      "id": "L_2x1_TopRight",
-      "description": "Big L rotated 180°",
-      "pattern": [
-        "XX",
-        ".X",
-        ".X"
-      ]
-    },
-    {
-      "id": "L_2x1_BottomRight",
-      "description": "Big L rotated 270° (ccw 90°)",
-      "pattern": [
-        "..X",
-        "XXX"
-      ]
-    },
+  "Tile": [
+    "X"
+  ],
 
 
-    // ── T shapes ─────────────────────────────────────────────────────────
-    {
-      "id": "T_3x2_Up",
-      "description": "T pointing up — base on bottom, stem goes up",
-      "pattern": [
-        ".X.",
-        "XXX"
-      ]
-    },
-    {
-      "id": "T_3x2_Right",
-      "description": "T pointing right — stem goes right",
-      "pattern": [
-        "X.",
-        "XX",
-        "X."
-      ]
-    },
-    {
-      "id": "T_3x2_Down",
-      "description": "T pointing down — base on top, stem goes down",
-      "pattern": [
-        "XXX",
-        ".X."
-      ]
-    },
-    {
-      "id": "T_3x2_Left",
-      "description": "T pointing left — stem goes left",
-      "pattern": [
-        ".X",
-        "XX",
-        ".X"
-      ]
-    },
+  "Line_Horisontal_2": [
+    "XX"
+  ],
 
-    // ── Plus / cross ──────────────────────────────────────────────────────
-    {
-      "id": "Cross_3x3",
-      "description": "Plus / cross — 5 cells",
-      "pattern": [
-        ".X.",
-        "XXX",
-        ".X."
-      ]
-    }
+  "Line_Vertical_2": [
+    "X",
+    "X"
+  ],
 
+  "Square_2": [
+    "XX",
+    "XX"
+  ],
+
+  "Square_3": [
+    "XXX",
+    "XXX",
+    "XXX"
+  ],
+
+  "Rectangle_3x2": [
+    "XXX",
+    "XXX"
+  ],
+
+  "Rectangle_2x3": [
+    "XX",
+    "XX",
+    "XX"
+  ],
+
+  "L_1x1_BottomLeft": [
+    "X_",
+    "XX"
+  ],
+
+  "L_1x1_TopLeft": [
+    "XX",
+    "X_"
+  ],
+
+  "L_1x1_TopRight": [
+    "XX",
+    "_X"
+  ],
+
+  "L_1x1_BottomRight": [
+    "_X",
+    "XX"
+  ],
+
+  "L_2x1_BottomLeft": [
+    "X_",
+    "X_",
+    "XX"
+  ],
+
+  "L_2x1_TopLeft": [
+    "XXX",
+    "X__"
+  ],
+
+  "L_2x1_TopRight": [
+    "XX",
+    ".X",
+    ".X"
+  ],
+
+  "L_2x1_BottomRight": [
+    "..X",
+    "XXX"
+  ],
+
+  "T_3x2_Up": [
+    ".X.",
+    "XXX"
+  ],
+
+  "T_3x2_Right": [
+    "X.",
+    "XX",
+    "X."
+  ],
+
+  "T_3x2_Down": [
+    "XXX",
+    ".X."
+  ],
+
+  "T_3x2_Left": [
+    ".X",
+    "XX",
+    ".X"
+  ],
+
+  "Cross_3x3": [
+    ".X.",
+    "XXX",
+    ".X."
   ]
-}
+} 
