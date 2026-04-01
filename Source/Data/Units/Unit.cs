@@ -1,5 +1,5 @@
 ﻿using SimulationEngine.Source.Data.Stats;
-using SimulationEngine.Source.Data.Stats.Enums;
+using SimulationEngine.Source.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

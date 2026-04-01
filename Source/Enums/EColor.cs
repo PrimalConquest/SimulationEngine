@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Data.Stats.Enums
+namespace SimulationEngine.Source.Enums
 {
     internal enum EColor : byte
     {

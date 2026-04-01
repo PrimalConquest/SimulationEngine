@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Events.EventTypes
+namespace SimulationEngine.Source.Enums.EventTypes
 {
     internal enum ESimulationEvent
     {

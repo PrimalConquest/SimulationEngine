@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SimulationEngine.Source.Enums.Logging;
+using SimulationEngine.Source.Systems;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -32,9 +34,12 @@ namespace SimulationEngine.Source.Data.Geometry
         public static Shape Parse(string[] rows)
         {
             if (rows == null || rows.Length == 0)
-                throw new ArgumentException("Shape pattern must have at least one row.");
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, "Shape:Parse - Shape pattern must have at least one row");
+                return new();
+            }
 
-            if(rows.Length == 1 && rows[0].Length == 1) return new Shape();
+            if(rows.Length == 1 && rows[0].Length == 1) return new();
 
             int height = rows.Length;
             HashSet<Point> extras = new();
@@ -42,7 +47,10 @@ namespace SimulationEngine.Source.Data.Geometry
             int anchorY = height-1, anchorX = rows[anchorY].IndexOf('X');
 
             if (anchorX == -1)
-                throw new ArgumentException("Shape pattern must contain at least one 'X'.");
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, "Shape:Parse - Shape pattern must contain at least one 'X'");
+                return new();
+            }
 
             for (int y = 0; y < height; y++)
             {

@@ -1,11 +1,12 @@
 ﻿using SimulationEngine.Source.Events;
+using SimulationEngine.Source.Events.Payloads;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Events.Busses.Interfaces
+namespace SimulationEngine.Source.Interfaces.Events
 {
-    internal interface IBus<T, P>
+    internal interface IEventBus<T, P> where P : EventPayload
     {
         public void RegisterChannel(T eventType);
 
@@ -13,7 +14,7 @@ namespace SimulationEngine.Source.Events.Busses.Interfaces
 
         bool RemoveChannel(T eventType);
 
-        bool AddListener(T eventType, EventCallback<P> callback, int priority = 0, bool enforceEventCreation = false);
+        bool AddListener(T eventType, EventCallback<P> callback, bool enforceEventCreation = false);
 
         int Raise(T eventType, P payload);
 

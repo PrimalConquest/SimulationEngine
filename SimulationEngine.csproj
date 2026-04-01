@@ -11,10 +11,6 @@
 		<ResultDLL>bin\Debug\netstandard2.1\SimulationEngine.dll</ResultDLL>
 		<SharedFolder>..\Shared</SharedFolder>
 	</PropertyGroup>
-	
-	<ItemGroup>
-	  <Folder Include="Source\Factories\" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\Shapes.json" />
@@ -25,8 +21,8 @@
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 
-	<Target Name="ExportToShared" AfterTargets="Build" >
-		<Copy SourceFiles="$(ResultDLL)" DestinationFolder="$(SharedFolder)"/>
+	<Target Name="ExportToShared" AfterTargets="Build">
+		<Copy SourceFiles="$(ResultDLL)" DestinationFolder="$(SharedFolder)" />
 	</Target>
 	
 </Project>
