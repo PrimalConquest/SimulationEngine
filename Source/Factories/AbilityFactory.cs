@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Factories
 {
-    internal class AbilityFactory
+    public class AbilityFactory
     {
     }
 }

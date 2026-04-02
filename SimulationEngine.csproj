@@ -13,7 +13,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\Shapes.json" />
+		<EmbeddedResource Include="Resources\**\*.*" />
 	</ItemGroup>
 		
 	
@@ -24,6 +24,7 @@
 	
 	<ItemGroup>
 	  <Folder Include="Resources\Abilities\" />
+	  <Folder Include="Resources\StatSheets\" />
 	  <Folder Include="Source\Data\Abilities\" />
 	</ItemGroup>
 

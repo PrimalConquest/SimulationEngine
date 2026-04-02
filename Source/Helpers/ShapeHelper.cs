@@ -17,7 +17,13 @@ namespace SimulationEngine.Source.Helpers
         {
             Assembly assembly = typeof(ShapeHelper).Assembly;
             using (Stream stream = assembly.GetManifestResourceStream(_resource))
-            { 
+            {
+                if (stream == null)
+                {
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"ShapeHelper:Parse There is no resource: {_resource}");
+                    return null;
+                }
+
                 using (StreamReader sr = new StreamReader(stream))
                 {
                     string json = sr.ReadToEnd();
