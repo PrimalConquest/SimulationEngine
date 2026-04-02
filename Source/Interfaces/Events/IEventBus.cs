@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Interfaces.Events
 {
-    internal interface IEventBus<T, P> where P : EventPayload
+    internal interface IEventBus<T, P>
     {
         public void RegisterChannel(T eventType);
 

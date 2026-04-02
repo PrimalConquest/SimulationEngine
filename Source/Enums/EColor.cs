@@ -10,6 +10,7 @@ namespace SimulationEngine.Source.Enums
         Yellow,
         Blue,
         Green,
-        Gray
+        Gray,
+        Any
     }
 }
