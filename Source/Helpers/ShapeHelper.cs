@@ -11,34 +11,30 @@ namespace SimulationEngine.Source.Helpers
 {
     public static class ShapeHelper
     {
-        static string _resource = "SimulationEngine.Resources.Shapes.json";
+
+        static string _resource = "Shapes.json";
 
         public static string[]? Parse(string id)
         {
-            Assembly assembly = typeof(ShapeHelper).Assembly;
-            using (Stream stream = assembly.GetManifestResourceStream(_resource))
+            
+            string? json = ResourceSystem.Get(_resource);
+
+            if (json == null)
             {
-                if (stream == null)
-                {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"ShapeHelper:Parse There is no resource: {_resource}");
-                    return null;
-                }
-
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    string json = sr.ReadToEnd();
-
-                    Dictionary<string, string[]>? shapeMap = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(json);
-
-                    if (shapeMap == null)
-                    {
-                        LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"ShapeHelper:Parse There is no shape with id: {id} in resource: {_resource}");
-                        return null;
-                    }
-
-                    return shapeMap[id];
-                }
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"ShapeHelper:Parse Could not unpack resource: {_resource}");
+                return null;
             }
+
+            Dictionary<string, string[]>? shapeMap = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(json);
+
+            if (shapeMap == null)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"ShapeHelper:Parse There is no shape with id: {id} in resource: {_resource}");
+                return null;
+            }
+
+            return shapeMap[id];
+                
         }
 
     }

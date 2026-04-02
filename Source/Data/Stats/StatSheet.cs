@@ -2,7 +2,6 @@
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Events.Busses;
 using SimulationEngine.Source.Events.Payloads;
-using SimulationEngine.Source.Helpers.Stats;
 using SimulationEngine.Source.Interfaces.Events;
 using System;
 using System.Collections.Generic;
@@ -12,9 +11,9 @@ namespace SimulationEngine.Source.Data.Stats
 {
     public class StatSheet
     {
-        private Dictionary<EStat, ushort> _stats;
+        private Dictionary<string, ushort> _stats;
 
-        private IEventBus<EStat, ValuePayload<ushort>> _onGetValue;
+        private IEventBus<string, ValuePayload<ushort>> _onGetValue;
         //make it into value changed PAYLOAD-----------------------------------------------------------------------------------------
         private IEventBus<string, ValuePayload<ushort>> _onValueChanged;
 

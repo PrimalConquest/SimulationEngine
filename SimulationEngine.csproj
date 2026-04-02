@@ -21,12 +21,6 @@
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 		
-	
-	<ItemGroup>
-	  <Folder Include="Resources\Abilities\" />
-	  <Folder Include="Resources\StatSheets\" />
-	  <Folder Include="Source\Data\Abilities\" />
-	</ItemGroup>
 
 	<Target Name="ExportToShared" AfterTargets="Build">
 		<Copy SourceFiles="$(ResultDLL)" DestinationFolder="$(SharedFolder)" />
