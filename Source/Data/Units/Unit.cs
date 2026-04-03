@@ -1,4 +1,5 @@
-﻿using SimulationEngine.Source.Data.Stats;
+﻿using SimulationEngine.Source.Data.Geometry;
+using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
@@ -13,29 +14,48 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Units
 {
-    internal abstract class Unit
+    internal class Unit
     {
         StatSheet _stats;
         public uint Id { get; private set; }
         public EColor Color { get; private set; }
+        
+        Point _position;
 
-        private IEventBus<EUnitEvent, EventPayload> _internalEventBus;
+        Shape _ocupation;
+
+        protected IEventBus<EUnitEvent, EventPayload> _unitEventBus;
 
         //Add Activate Ability
 
-        protected Unit(uint id)
+        public int X { get { return _position.X; } set { _position.X = value; } }
+        public int Y { get { return _position.Y; } set { _position.Y = value; } }
+        public Point Position { get { return _position; } set { _position = value; } }
+
+        public Unit(uint id, StatSheet stats, Shape ocupation = default)
         {
             Id = id;
-            _internalEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
-            //if(color )
+            _stats = stats;
+            _ocupation = ocupation;
 
-            _stats = new();
-            /*Stat<ushort> Health = new();
-            foreach (EValueType type in Enum.GetValues(typeof(EValueType))) Health.RegisterValue(EValueType.BASE);
-            _stats.RegisterAttribute(EStat.Health, Health);*/
+            _unitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
 
-            _internalEventBus.AddListener(EUnitEvent.GetStat, new(OnGetStat));
-            
+            foreach (EUnitEvent type in Enum.GetValues(typeof(EUnitEvent)))
+            {
+                _unitEventBus.RegisterChannel(type);
+            }
+
+            _unitEventBus.AddListener(EUnitEvent.GetStat, new(OnGetStat));
+
+            _stats.ListenOnValueChange(EStat.Health, new(OnHealthChanged));
+        }
+
+        private void OnHealthChanged(ValueChangedPayload<ushort> payload)
+        {
+            if (payload.Value == 0)
+            {
+                Trigger(EUnitEvent.Die, new());
+            }
         }
 
         private void OnGetStat(EventPayload payload)
@@ -52,7 +72,7 @@ namespace SimulationEngine.Source.Data.Units
 
         public void Trigger(EUnitEvent signal, EventPayload data)
         {
-            _internalEventBus.Raise(signal, data);
+            _unitEventBus.Raise(signal, data);
         }
     }
 }

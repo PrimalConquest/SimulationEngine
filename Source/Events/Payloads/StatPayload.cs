@@ -9,5 +9,11 @@ namespace SimulationEngine.Source.Events.Payloads
     {
         public EStat Stat { get; set; }
         public uint Value { get; set; }
+
+        public StatPayload(EStat stat, uint value)
+        {
+            Stat = stat;
+            Value = value;
+        }
     }
 }

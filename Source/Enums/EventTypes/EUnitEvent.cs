@@ -6,6 +6,11 @@ namespace SimulationEngine.Source.Enums.EventTypes
 {
     internal enum EUnitEvent
     {
-        GetStat
+        GetStat,
+        Activate,
+        Die,
+        Spawn,
+        Retreat,
+        Move
     }
 }

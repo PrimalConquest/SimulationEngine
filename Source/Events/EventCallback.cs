@@ -17,5 +17,7 @@ namespace SimulationEngine.Source.Events
             Handle = handle;
             IsOneShot = isOneShot;
         }
+
+        public static implicit operator EventCallback<P>( Action<P> handle) => new(handle);
     }
 }

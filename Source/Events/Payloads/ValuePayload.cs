@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Events.Payloads
 {
-    internal class ValuePayload<T> : EventPayload
+    public class ValuePayload<T> : EventPayload
     {
         public T? Value { get; set; }
 

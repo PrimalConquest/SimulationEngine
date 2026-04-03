@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
+using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
+using SimulationEngine.Source.Events;
 using SimulationEngine.Source.Events.Busses;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Interfaces.Events;
+using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,12 +18,12 @@ namespace SimulationEngine.Source.Data.Stats
 
         private IEventBus<EStat, ValuePayload<ushort>> _onGetValue;
         //make it into value changed PAYLOAD-----------------------------------------------------------------------------------------
-        private IEventBus<EStat, ValuePayload<ushort>> _onValueChanged;
+        private IEventBus<EStat, ValueChangedPayload<ushort>> _onValueChanged;
 
         public StatSheet()
         {
             _stats = new();
-            _onValueChanged = new PriorityEventBus<EStat, ValuePayload<ushort>>();
+            _onValueChanged = new PriorityEventBus<EStat, ValueChangedPayload<ushort>>();
             _onGetValue = new PriorityEventBus<EStat, ValuePayload<ushort>>();
         }
 
@@ -33,7 +36,7 @@ namespace SimulationEngine.Source.Data.Stats
         }
         public StatSheet DeepCopy()
         {
-            var copy = new StatSheet();
+            StatSheet copy = new StatSheet();
 
             foreach (var kv in _stats)
             {
@@ -51,8 +54,9 @@ namespace SimulationEngine.Source.Data.Stats
 
         public void SetStat(EStat stat, ushort value)
         {
+
+            ValueChangedPayload<ushort> payload = new ValueChangedPayload<ushort>(value, _stats[stat]);
             _stats[stat] = value;
-            ValuePayload<ushort> payload = new ValuePayload<ushort>(value);
             _onValueChanged.Raise(stat, payload);
         }
 
@@ -62,7 +66,27 @@ namespace SimulationEngine.Source.Data.Stats
             ValuePayload<ushort> payload = new ValuePayload<ushort>(value);
             _onGetValue.Raise(stat, payload);
             return payload.Value;
-        } 
+        }
 
+        public bool ListenOnValueChange(EStat stat, EventCallback<ValueChangedPayload<ushort>> callback, bool enforceEventCreation = false)
+        {
+            if (!_stats.ContainsKey(stat))
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnvalueChange - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                return false;
+            }
+            _onValueChanged.AddListener(stat, callback, enforceEventCreation);
+
+            return true;
+        }
+
+        public bool StopListenOnValueChange(EStat stat, EventCallback<ValueChangedPayload<ushort>> callback)
+        {
+            if (_stats.ContainsKey(stat))
+            {
+                _onValueChanged.RemoveListener(stat, callback);
+            }
+            return true;
+        }
     }
 }

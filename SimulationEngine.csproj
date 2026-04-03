@@ -21,6 +21,11 @@
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 		
+	
+	<ItemGroup>
+	  <Folder Include="Resources\Units\" />
+	</ItemGroup>
+		
 
 	<Target Name="ExportToShared" AfterTargets="Build">
 		<Copy SourceFiles="$(ResultDLL)" DestinationFolder="$(SharedFolder)" />

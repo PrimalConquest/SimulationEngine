@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Data.Units
+namespace SimulationEngine.Source.Enums
 {
     internal enum EUnitType
     {
