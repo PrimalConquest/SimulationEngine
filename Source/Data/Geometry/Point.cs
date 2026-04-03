@@ -6,7 +6,7 @@ namespace SimulationEngine.Source.Data.Geometry
 {
     public struct Point
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int x;
+        public int y;
     }
 }

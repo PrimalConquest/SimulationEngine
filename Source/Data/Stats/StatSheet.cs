@@ -68,6 +68,27 @@ namespace SimulationEngine.Source.Data.Stats
             return payload.Value;
         }
 
+        public bool ListenOnGetValue(EStat stat, EventCallback<ValuePayload<ushort>> callback, bool enforceEventCreation = false)
+        {
+            if (!_stats.ContainsKey(stat))
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnGetValue - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                return false;
+            }
+            _onGetValue.AddListener(stat, callback, enforceEventCreation);
+
+            return true;
+        }
+
+        public bool StopListenOnGetValue(EStat stat, EventCallback<ValuePayload<ushort>> callback)
+        {
+            if (_stats.ContainsKey(stat))
+            {
+                _onGetValue.RemoveListener(stat, callback);
+            }
+            return true;
+        }
+
         public bool ListenOnValueChange(EStat stat, EventCallback<ValueChangedPayload<ushort>> callback, bool enforceEventCreation = false)
         {
             if (!_stats.ContainsKey(stat))

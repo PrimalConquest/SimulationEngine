@@ -16,63 +16,49 @@ namespace SimulationEngine.Source.Data.Units
 {
     internal class Unit
     {
-        StatSheet _stats;
-        public uint Id { get; private set; }
-        public EColor Color { get; private set; }
-        
+
         Point _position;
 
         Shape _ocupation;
+        public uint Id { get; private set; }
 
-        protected IEventBus<EUnitEvent, EventPayload> _unitEventBus;
+        public StatSheet Stats { get; private set; }
+        public EColor Color { get; private set; }
 
-        //Add Activate Ability
-
-        public int X { get { return _position.X; } set { _position.X = value; } }
-        public int Y { get { return _position.Y; } set { _position.Y = value; } }
+        public int X { get { return _position.x; } set { _position.x = value; } }
+        public int Y { get { return _position.y; } set { _position.y = value; } }
         public Point Position { get { return _position; } set { _position = value; } }
+
+        public IEventBus<EUnitEvent, EventPayload> UnitEventBus { get; private set; }
 
         public Unit(uint id, StatSheet stats, Shape ocupation = default)
         {
             Id = id;
-            _stats = stats;
+            Stats = stats;
             _ocupation = ocupation;
 
-            _unitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
+            UnitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
 
             foreach (EUnitEvent type in Enum.GetValues(typeof(EUnitEvent)))
             {
-                _unitEventBus.RegisterChannel(type);
+                UnitEventBus.RegisterChannel(type);
             }
 
-            _unitEventBus.AddListener(EUnitEvent.GetStat, new(OnGetStat));
-
-            _stats.ListenOnValueChange(EStat.Health, new(OnHealthChanged));
+            Stats.ListenOnValueChange(EStat.Health, new(OnHealthChanged));
         }
 
         private void OnHealthChanged(ValueChangedPayload<ushort> payload)
         {
             if (payload.Value == 0)
             {
-                Trigger(EUnitEvent.Die, new());
+                UnitEventBus.Raise(EUnitEvent.Die, new());
             }
         }
 
-        private void OnGetStat(EventPayload payload)
+        public uint GetStat(EStat stat)
         {
-            StatPayload? statPayload = payload as StatPayload;
-            if(statPayload == null)
-            {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, "Unit.OnGetStat - payload is not of type StatPayload");
-                return;
-            }
-
-             statPayload.Value = _stats.GetStat(statPayload.Stat);
+            return Stats.GetStat(stat);
         }
 
-        public void Trigger(EUnitEvent signal, EventPayload data)
-        {
-            _unitEventBus.Raise(signal, data);
-        }
     }
 }

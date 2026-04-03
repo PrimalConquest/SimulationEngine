@@ -11,7 +11,7 @@ namespace SimulationEngine.Source.Events
         public Action<P> Handle { get; }
         public bool IsOneShot { get; }
 
-        public EventCallback(Action<P> handle, int priority = 0, bool isOneShot = false)
+        public EventCallback(Action<P> handle, int priority = 5, bool isOneShot = false)
         {
             Priority = priority;
             Handle = handle;

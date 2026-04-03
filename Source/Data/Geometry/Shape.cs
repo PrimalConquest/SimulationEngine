@@ -65,7 +65,7 @@ namespace SimulationEngine.Source.Data.Geometry
 
                     if (foundX == 0 && foundY == 0) continue;
 
-                    extras.Add(new Point { X = foundX, Y = foundY });
+                    extras.Add(new Point { x = foundX, y = foundY });
                 }
             }
 

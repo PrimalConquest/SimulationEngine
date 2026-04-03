@@ -7,8 +7,9 @@ namespace SimulationEngine.Source.Enums.Stats
     public enum EStat
     {
         Health,
-        Color,
+        AbilityPower,
         Energy,
+        Toll,
         MoveSpeed,
         MoveCost
     }
