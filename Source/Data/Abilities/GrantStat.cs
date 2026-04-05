@@ -7,18 +7,22 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Abilities
 {
-    internal class GrantEnergy : Ability
+    internal class GrantStat : Ability
     {
-        public GrantEnergy(Unit owner) : base(owner)
+        public GrantStat(Unit owner) : base(owner)
         {
-            AddStatDependancy(EStat.Energy);
         }
 
         public override void Activate(EventPayload payload)
         {
-            Dictionary<EStat, uint> stats =  GetActualStats();
+            List<Unit> targets = GetTargets();
 
+            if (targets.Count == 0) return;
 
+        }
+        public override void Extract(string json)
+        {
+            //throw new NotImplementedException();
         }
     }
 }

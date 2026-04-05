@@ -1,4 +1,5 @@
-﻿using SimulationEngine.Source.Data.Geometry;
+﻿using SimulationEngine.Source.Data.Abilities;
+using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
@@ -20,10 +21,15 @@ namespace SimulationEngine.Source.Data.Units
         Point _position;
 
         Shape _ocupation;
+
         public uint Id { get; private set; }
 
         public StatSheet Stats { get; private set; }
         public EColor Color { get; private set; }
+
+        Dictionary<EUnitEvent, Ability> _abilities;
+
+        public bool CanActivate { get { return Stats.GetStat(EStat.Energy) >= GetActivationCost(); } }
 
         public int X { get { return _position.x; } set { _position.x = value; } }
         public int Y { get { return _position.y; } set { _position.y = value; } }
@@ -36,6 +42,7 @@ namespace SimulationEngine.Source.Data.Units
             Id = id;
             Stats = stats;
             _ocupation = ocupation;
+            _abilities = new();
 
             UnitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
 
@@ -44,20 +51,65 @@ namespace SimulationEngine.Source.Data.Units
                 UnitEventBus.RegisterChannel(type);
             }
 
-            Stats.ListenOnValueChange(EStat.Health, new(OnHealthChanged));
+            Stats.ListenOnPostStatChange(EStat.Health, new(OnHealthChanged, 2));
+            Stats.ListenOnPostStatChange(EStat.Energy, new(OnEnergyChanged, 2));
+
+            UnitEventBus.AddListener(EUnitEvent.TryActivate, new(Activate));
         }
 
-        private void OnHealthChanged(ValueChangedPayload<ushort> payload)
+        public void Activate(EventPayload payload)
         {
-            if (payload.Value == 0)
+            if(!CanActivate)
+            {
+                payload.Cancelled = false;
+            }
+            UnitEventBus.Raise(EUnitEvent.Activate, payload);
+        }
+
+        public int GetActivationCost()
+        {
+            int res = 0;
+            foreach (KeyValuePair<EUnitEvent, Ability> ability in _abilities)
+            {
+                if(ability.Key != EUnitEvent.Activate) continue;
+                res += ability.Value.ActivationCost;
+            }
+            return res;
+        }
+
+        private void OnHealthChanged(ValueChangedPayload<int> payload)
+        {
+            if (payload.Value <= 0)
             {
                 UnitEventBus.Raise(EUnitEvent.Die, new());
             }
         }
+        private void OnEnergyChanged(ValueChangedPayload<int> payload)
+        {
+            if (payload.Value <= 0)
+            {
+                Stats.SetStat(EStat.Energy, 0);
+            }
+            int max = Stats.GetStat(EStat.MaxEnergy);
+            if (payload.Value > max) Stats.SetStat(EStat.Energy, max);
+        }
 
-        public uint GetStat(EStat stat)
+        public void RecieveDamage(Damage damage)
+        {
+            DamageEventPayload payload = new DamageEventPayload(damage);
+            UnitEventBus.Raise(EUnitEvent.RecieveDamage, payload);
+            Stats.GrantStat(EStat.Health, -payload.Damage.Value);
+        }
+
+        public int GetStat(EStat stat)
         {
             return Stats.GetStat(stat);
+        }
+
+        public void GrantAbility(EUnitEvent activation, Ability ability)
+        {
+            _abilities.Add(activation, ability);
+            UnitEventBus.AddListener(activation, new(ability.Activate, ability.Priority));
         }
 
     }

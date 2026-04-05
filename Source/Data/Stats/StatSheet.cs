@@ -14,22 +14,26 @@ namespace SimulationEngine.Source.Data.Stats
 {
     public class StatSheet
     {
-        private Dictionary<EStat, ushort> _stats;
+        private Dictionary<EStat, int> _stats;
 
-        private IEventBus<EStat, ValuePayload<ushort>> _onGetValue;
-        //make it into value changed PAYLOAD-----------------------------------------------------------------------------------------
-        private IEventBus<EStat, ValueChangedPayload<ushort>> _onValueChanged;
+        private IEventBus<EStat, ValuePayload<int>> _onGetStat;
+        private IEventBus<EStat, ValuePayload<int>> _onGrantStat;
+        private IEventBus<EStat, ValueChangedPayload<int>> _preStatChanged;
+        private IEventBus<EStat, ValueChangedPayload<int>> _postStatChanged;
 
         public StatSheet()
         {
             _stats = new();
-            _onValueChanged = new PriorityEventBus<EStat, ValueChangedPayload<ushort>>();
-            _onGetValue = new PriorityEventBus<EStat, ValuePayload<ushort>>();
+
+            _onGetStat = new PriorityEventBus<EStat, ValuePayload<int>>();
+            _onGrantStat = new PriorityEventBus<EStat, ValuePayload<int>>();
+            _preStatChanged = new PriorityEventBus<EStat, ValueChangedPayload<int>>();
+            _postStatChanged = new PriorityEventBus<EStat, ValueChangedPayload<int>>();
         }
 
-        public StatSheet(Dictionary<EStat, ushort> info) : this()
+        public StatSheet(Dictionary<EStat, int> info) : this()
         {
-            foreach (KeyValuePair<EStat, ushort> stat in info)
+            foreach (KeyValuePair<EStat, int> stat in info)
             {
                 RegisterStat(stat.Key, stat.Value);
             }
@@ -45,67 +49,117 @@ namespace SimulationEngine.Source.Data.Stats
             return copy;
         }
 
-        public void RegisterStat(EStat stat, ushort value)
+        public void RegisterStat(EStat stat, int value)
         {
             _stats.Add(stat, value);
-            _onGetValue.RegisterChannel(stat);
-            _onValueChanged.RegisterChannel(stat);
+            _onGetStat.RegisterChannel(stat);
+            _onGrantStat.RegisterChannel(stat);
+            _preStatChanged.RegisterChannel(stat);
+            _postStatChanged.RegisterChannel(stat);
         }
 
-        public void SetStat(EStat stat, ushort value)
+        public void SetStat(EStat stat, int value)
         {
 
-            ValueChangedPayload<ushort> payload = new ValueChangedPayload<ushort>(value, _stats[stat]);
-            _stats[stat] = value;
-            _onValueChanged.Raise(stat, payload);
+            ValueChangedPayload<int> payload = new ValueChangedPayload<int>(value, _stats[stat]);
+            _preStatChanged.Raise(stat, payload);
+            _stats[stat] = payload.Value;
+            _postStatChanged.Raise(stat, payload);
+        }
+        public void GrantStat(EStat stat, int value)
+        {
+            ValuePayload<int> payload = new ValuePayload<int>(value);
+            SetStat(stat, _stats[stat] + payload.Value);
         }
 
-        public ushort GetStat(EStat stat)
+        public int GetStat(EStat stat)
         {
             _stats.TryGetValue(stat, out var value);
-            ValuePayload<ushort> payload = new ValuePayload<ushort>(value);
-            _onGetValue.Raise(stat, payload);
+            ValuePayload<int> payload = new ValuePayload<int>(value);
+            _onGetStat.Raise(stat, payload);
             return payload.Value;
         }
 
-        public bool ListenOnGetValue(EStat stat, EventCallback<ValuePayload<ushort>> callback, bool enforceEventCreation = false)
+        public bool ListenOnGetStat(EStat stat, EventCallback<ValuePayload<int>> callback, bool enforceEventCreation = false)
         {
             if (!_stats.ContainsKey(stat))
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnGetValue - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnGetStat - Trying to listen on value type that isnt registerd ({stat.ToString()})");
                 return false;
             }
-            _onGetValue.AddListener(stat, callback, enforceEventCreation);
+            _onGetStat.AddListener(stat, callback, enforceEventCreation);
 
             return true;
         }
 
-        public bool StopListenOnGetValue(EStat stat, EventCallback<ValuePayload<ushort>> callback)
+        public bool StopListenOnGetStat(EStat stat, EventCallback<ValuePayload<int>> callback)
         {
             if (_stats.ContainsKey(stat))
             {
-                _onGetValue.RemoveListener(stat, callback);
+                _onGetStat.RemoveListener(stat, callback);
             }
             return true;
         }
 
-        public bool ListenOnValueChange(EStat stat, EventCallback<ValueChangedPayload<ushort>> callback, bool enforceEventCreation = false)
+        public bool ListenOnGrantStat(EStat stat, EventCallback<ValuePayload<int>> callback, bool enforceEventCreation = false)
         {
             if (!_stats.ContainsKey(stat))
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnvalueChange - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnGrantStat - Trying to listen on value type that isnt registerd ({stat.ToString()})");
                 return false;
             }
-            _onValueChanged.AddListener(stat, callback, enforceEventCreation);
+            _onGrantStat.AddListener(stat, callback, enforceEventCreation);
 
             return true;
         }
 
-        public bool StopListenOnValueChange(EStat stat, EventCallback<ValueChangedPayload<ushort>> callback)
+        public bool StopListenOnGrantStat(EStat stat, EventCallback<ValuePayload<int>> callback)
         {
             if (_stats.ContainsKey(stat))
             {
-                _onValueChanged.RemoveListener(stat, callback);
+                _onGrantStat.RemoveListener(stat, callback);
+            }
+            return true;
+        }
+
+        public bool ListenOnPreStatChange(EStat stat, EventCallback<ValueChangedPayload<int>> callback, bool enforceEventCreation = false)
+        {
+            if (!_stats.ContainsKey(stat))
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnPreStatChange - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                return false;
+            }
+            _preStatChanged.AddListener(stat, callback, enforceEventCreation);
+
+            return true;
+        }
+
+        public bool StopListenOnPreStatChange(EStat stat, EventCallback<ValueChangedPayload<int>> callback)
+        {
+            if (_stats.ContainsKey(stat))
+            {
+                _preStatChanged.RemoveListener(stat, callback);
+            }
+            return true;
+        }
+
+        public bool ListenOnPostStatChange(EStat stat, EventCallback<ValueChangedPayload<int>> callback, bool enforceEventCreation = false)
+        {
+            if (!_stats.ContainsKey(stat))
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"StatSheet.ListenOnPostStatChange - Trying to listen on value type that isnt registerd ({stat.ToString()})");
+                return false;
+            }
+            _postStatChanged.AddListener(stat, callback, enforceEventCreation);
+
+            return true;
+        }
+
+        public bool StopListenOnPostStatChange(EStat stat, EventCallback<ValueChangedPayload<int>> callback)
+        {
+            if (_stats.ContainsKey(stat))
+            {
+                _postStatChanged.RemoveListener(stat, callback);
             }
             return true;
         }

@@ -7,13 +7,12 @@ namespace SimulationEngine.Source.Events.Payloads
 {
     internal class StatPayload : EventPayload
     {
-        public EStat Stat { get; set; }
-        public uint Value { get; set; }
+        public EValueType Type { get; set; }
+        public int Value { get; set; }
 
-        public StatPayload(EStat stat, uint value)
+        public StatPayload(EValueType type, int value)
         {
-            Stat = stat;
-            Value = value;
+            Type = type; Value = value;
         }
     }
 }

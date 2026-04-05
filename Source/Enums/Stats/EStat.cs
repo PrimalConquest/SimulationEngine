@@ -9,6 +9,7 @@ namespace SimulationEngine.Source.Enums.Stats
         Health,
         AbilityPower,
         Energy,
+        MaxEnergy,
         Toll,
         MoveSpeed,
         MoveCost

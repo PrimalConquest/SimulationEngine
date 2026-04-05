@@ -7,10 +7,12 @@ namespace SimulationEngine.Source.Enums.EventTypes
     internal enum EUnitEvent
     {
         GetStat,
+        TryActivate,
         Activate,
         Die,
         Spawn,
         Retreat,
-        Move
+        Move,
+        RecieveDamage
     }
 }

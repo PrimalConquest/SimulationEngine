@@ -6,10 +6,8 @@ namespace SimulationEngine.Source.Enums.Stats
 {
     internal enum EValueType : byte
     {
-        BASE,
-        CURRENT,
-        MIN,
-        MAX,
-        Size
+        Current,
+        Max,
+        Min
     }
 }
