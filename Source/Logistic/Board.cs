@@ -1,4 +1,5 @@
-﻿using SimulationEngine.Source.Data.Units;
+﻿using SimulationEngine.Source.Data.Geometry;
+using SimulationEngine.Source.Data.Units;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,15 +8,17 @@ using System.Text;
 
 namespace SimulationEngine.Source.Logistic
 {
-    internal class Board
+    public class Board
     {
         int _width;
         int _height;
-        int[,] _tiles;
+        uint[,] _tiles;
 
         public Board(int boardX, int boardY)
         {
-            _tiles = new int[_width, _height];
+            _width = boardX;
+            _height = boardY;
+            _tiles = new uint[_width, _height];
             Clear();
         }
 
@@ -35,18 +38,19 @@ namespace SimulationEngine.Source.Logistic
             Point p = new();
 
             p.X = _width - 1 - coords.X;
+            //height is multiplied by 2 in order to account for the boubled mirrored board of the enmey player
             p.Y = 2 * _height - 1 - coords.Y;
 
             return p;
         }
-        public int Get(Point coords)
+        public uint Get(Cell coords)
         {
-            return _tiles[coords.X, coords.Y];
+            return _tiles[coords.x, coords.y];
         }
 
-        public void Set(Point coords, int index)
+        public void Set(Cell coords, uint index)
         {
-            _tiles[coords.X, coords.Y] = index;
+            _tiles[coords.x, coords.y] = index;
         }
     }
 }

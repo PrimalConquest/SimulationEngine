@@ -19,11 +19,9 @@ namespace SimulationEngine.Source.Data.Units
 {
     public class Unit : IDeepCopyable<Unit>
     {
+        Cell _position;
 
-        Point _position;
-
-        Shape _ocupation;
-
+        public Shape Ocupation { get; private set; }
         public Player OwningPlayer { get; private set; }
 
         public StatSheet Stats { get; private set; }
@@ -35,7 +33,7 @@ namespace SimulationEngine.Source.Data.Units
 
         public int X { get { return _position.x; } set { _position.x = value; } }
         public int Y { get { return _position.y; } set { _position.y = value; } }
-        public Point Position { get { return _position; } set { _position = value; } }
+        public Cell Position { get { return _position; } set { _position = value; } }
 
         public IEventBus<EUnitEvent, EventPayload> UnitEventBus { get; private set; }
 
@@ -44,7 +42,7 @@ namespace SimulationEngine.Source.Data.Units
             OwningPlayer = owningPlayer;
             Color = color;
             Stats = stats;
-            _ocupation = ocupation;
+            Ocupation = ocupation;
             _abilities = new();
 
             UnitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
@@ -117,7 +115,7 @@ namespace SimulationEngine.Source.Data.Units
 
         public Unit DeepCopy()
         {
-            return new(OwningPlayer, Color, Stats.DeepCopy(), _ocupation);
+            return new(OwningPlayer, Color, Stats.DeepCopy(), Ocupation);
         }
 
         virtual public Unit DeepCopy(Player owningPlayer)

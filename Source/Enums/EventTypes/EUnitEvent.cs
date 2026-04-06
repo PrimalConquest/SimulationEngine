@@ -10,9 +10,10 @@ namespace SimulationEngine.Source.Enums.EventTypes
         TryActivate,
         Activate,
         Die,
-        Spawn,
+        Draft,
         Retreat,
         Move,
-        RecieveDamage
+        RecieveDamage,
+        RecieveEffect
     }
 }

@@ -4,9 +4,14 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Geometry
 {
-    public struct Point
+    public struct Cell
     {
         public int x;
         public int y;
+
+        public override string ToString()
+        {
+            return $"[X:{x}, Y:{y}]";
+        }
     }
 }

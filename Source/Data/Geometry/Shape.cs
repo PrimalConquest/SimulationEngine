@@ -10,17 +10,17 @@ namespace SimulationEngine.Source.Data.Geometry
     {
 
         ///<summary>
-        ///Ancher point must be the leftmost point on the bottom row of the shape
+        ///Anchor point must be the leftmost point on the bottom row of the shape
         ///</summary>
         //public Point Anchor { get; set; }
-        public HashSet<Point>? Offsets { get; set; }
+        public HashSet<Cell>? Offsets { get; set; }
 
         public Shape()
         {
             Offsets = null;
         }
 
-        public Shape(HashSet<Point> offsets)
+        public Shape(HashSet<Cell> offsets)
         {
             Offsets = offsets;
         }
@@ -42,7 +42,7 @@ namespace SimulationEngine.Source.Data.Geometry
             if(rows.Length == 1 && rows[0].Length == 1) return new();
 
             int height = rows.Length;
-            HashSet<Point> extras = new();
+            HashSet<Cell> extras = new();
 
             int anchorY = height-1, anchorX = rows[anchorY].IndexOf('X');
 
@@ -65,7 +65,7 @@ namespace SimulationEngine.Source.Data.Geometry
 
                     if (foundX == 0 && foundY == 0) continue;
 
-                    extras.Add(new Point { x = foundX, y = foundY });
+                    extras.Add(new Cell { x = foundX, y = foundY });
                 }
             }
 
