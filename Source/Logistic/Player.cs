@@ -17,18 +17,18 @@ namespace SimulationEngine.Source.Logistic
         public uint Id { get; private set; }
         public Board Board { get; private set; }
         public Dictionary<uint, Unit> Commanders { get; private set; }
-        public List<string> OfficerIds { get; private set; }
+        public Dictionary<uint, Unit> Officers { get; private set; }
         public Dictionary<uint, Unit> Units { get; set; }
 
-        public Player(uint id, Dictionary<string, Cell> commanderIds, List<string> officerIds, Board board)
+        public Player(uint id, Dictionary<string, Cell> commanderIds, Dictionary<uint, Unit> officers, Board board)
         {
             Id = id;
             Board = board;
             Commanders = new();
-            OfficerIds = officerIds;
+            Officers = officers;
             Units = new();
 
-            foreach (KeyValuePair<string, Cell> commanderId in commanderIds)
+            /*oreach (KeyValuePair<string, Cell> commanderId in commanderIds)
             {
                 KeyValuePair<uint, Unit>? commander = SpawnUnit(commanderId.Key);
                 if (commander == null) { continue; }
@@ -36,7 +36,7 @@ namespace SimulationEngine.Source.Logistic
                 Commanders.Add(commander.Value.Key, commander.Value.Value);
 
                 Board.Set(commanderId.Value, commander.Value.Key);
-            }
+            }*/
 
         }
 
@@ -54,7 +54,7 @@ namespace SimulationEngine.Source.Logistic
             return true;
         }
 
-        void PlaceOfficer(int officerIndex, Cell position)
+        /*public void PlaceOfficer(int officerIndex, Cell position)
         {
             if(officerIndex >= OfficerIds.Count)
             {
@@ -99,6 +99,6 @@ namespace SimulationEngine.Source.Logistic
             }
             uint simId = SimulationSystem.NextId();
             return new KeyValuePair<uint, Unit>( simId, unit );
-        }
+        }*/
     }
 }

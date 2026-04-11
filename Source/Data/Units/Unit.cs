@@ -5,6 +5,7 @@ using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
+using SimulationEngine.Source.Events;
 using SimulationEngine.Source.Events.Busses;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Interfaces;
@@ -27,7 +28,7 @@ namespace SimulationEngine.Source.Data.Units
         public StatSheet Stats { get; private set; }
         public EColor Color { get; private set; }
 
-        Dictionary<EUnitEvent, Ability> _abilities;
+        Dictionary<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> _abilities;
 
         public bool CanActivate { get { return Stats.GetStat(EStat.Energy) >= GetActivationCost(); } }
 
@@ -70,10 +71,10 @@ namespace SimulationEngine.Source.Data.Units
         public int GetActivationCost()
         {
             int res = 0;
-            foreach (KeyValuePair<EUnitEvent, Ability> ability in _abilities)
+            foreach (KeyValuePair<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> ability in _abilities)
             {
-                if(ability.Key != EUnitEvent.Activate) continue;
-                res += ability.Value.ActivationCost;
+                if(ability.Value.Key != EUnitEvent.Activate) continue;
+                res += ability.Key.ActivationCost;
             }
             return res;
         }
@@ -109,8 +110,20 @@ namespace SimulationEngine.Source.Data.Units
 
         public void GrantAbility(EUnitEvent activation, Ability ability)
         {
-            _abilities.Add(activation, ability);
-            UnitEventBus.AddListener(activation, new(ability.Activate, ability.Priority));
+            KeyValuePair<EUnitEvent, EventCallback<EventPayload>> hook = new(activation, new(ability.Activate, ability.Priority));
+            _abilities.Add(ability, hook);
+            UnitEventBus.AddListener(activation, hook.Value);
+        }
+
+        public void RemoveAbility(Ability ability)
+        {
+            _abilities.TryGetValue(ability, out KeyValuePair<EUnitEvent, EventCallback<EventPayload>> hook);
+            if(hook.Value == null)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveAbility - no ability");
+                return;
+            }
+            UnitEventBus.RemoveListener(hook.Key, hook.Value);
         }
 
         public Unit DeepCopy()

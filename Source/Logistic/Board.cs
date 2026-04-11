@@ -26,7 +26,7 @@ namespace SimulationEngine.Source.Logistic
         {
             for (int i = 0; i < _width; i++)
             {
-                for (int j=0; j < _height; i++)
+                for (int j=0; j < _height; j++)
                 {
                     _tiles[i,j] = 0;
                 }
