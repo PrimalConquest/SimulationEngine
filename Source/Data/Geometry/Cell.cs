@@ -13,5 +13,20 @@ namespace SimulationEngine.Source.Data.Geometry
         {
             return $"[X:{x}, Y:{y}]";
         }
+
+        public int Magnitude()
+        {
+            return x + y;
+        }
+
+        public static Cell operator +(Cell left, Cell right)
+        {
+            return new Cell { x = left.x + right.x, y = left.y + right.y };
+        }
+
+        public static Cell operator *(Cell left, Cell right)
+        {
+            return new Cell { x = left.x * right.x, y = left.y * right.y };
+        }
     }
 }

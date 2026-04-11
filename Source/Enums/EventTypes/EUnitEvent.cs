@@ -12,6 +12,7 @@ namespace SimulationEngine.Source.Enums.EventTypes
         Die,
         Draft,
         Retreat,
+        TryMove,
         Move,
         RecieveDamage,
         RecieveEffect

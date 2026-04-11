@@ -2,8 +2,10 @@
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
+using SimulationEngine.Source.Events.Busses;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories;
+using SimulationEngine.Source.Interfaces.Events;
 using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,11 @@ namespace SimulationEngine.Source.Logistic
         public Dictionary<uint, Unit> Officers { get; private set; }
         public Dictionary<uint, Unit> Units { get; set; }
 
+        public List<uint> PlacedSpecialUnits { get; private set; }
+
+        public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
+        public int CurrentMoves { get; set; }
+
         public Player(uint id, Dictionary<string, Cell> commanderIds, Dictionary<uint, Unit> officers, Board board)
         {
             Id = id;
@@ -27,78 +34,39 @@ namespace SimulationEngine.Source.Logistic
             Commanders = new();
             Officers = officers;
             Units = new();
+            PlacedSpecialUnits = new();
 
-            /*oreach (KeyValuePair<string, Cell> commanderId in commanderIds)
+            PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
+
+            foreach (EGameEvent type in Enum.GetValues(typeof(EGameEvent)))
             {
-                KeyValuePair<uint, Unit>? commander = SpawnUnit(commanderId.Key);
-                if (commander == null) { continue; }
-                commander.Value.Value.Position = commanderId.Value;
-                Commanders.Add(commander.Value.Key, commander.Value.Value);
-
-                Board.Set(commanderId.Value, commander.Value.Key);
-            }*/
-
+                PlayerEventBus.RegisterChannel(type);
+            }
+            PlayerEventBus.AddListener(EGameEvent.TurnStart, new(ClearRemainingMoves, int.MaxValue));
+            PlayerEventBus.AddListener(EGameEvent.TurnEnd, new(ClearRemainingMoves, int.MaxValue));
         }
 
-        bool CanPlaceUnit(Shape unitShape, Cell position)
+        public void OnTurnStart()
         {
-            if(Board.Get(position) != 0) return false;
-
-            if (unitShape.Offsets == null) return true;
-
-            foreach(Cell extend in unitShape.Offsets)
-            {
-                if (Board.Get(position) != 0) return false;
-            }
-
-            return true;
+            PlayerEventBus.Raise(EGameEvent.TurnStart, new());
         }
 
-        /*public void PlaceOfficer(int officerIndex, Cell position)
+        public void OnTurnEnd()
         {
-            if(officerIndex >= OfficerIds.Count)
-            {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Player.SpawnOfficer - officer index '{officerIndex}' out of bounds");
-                return;
-            }
-            string officerId = OfficerIds[officerIndex];
-            KeyValuePair<uint, Unit>? officer = SpawnUnit(officerId);
-            if(officer == null)
-            {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Player.SpawnOfficer - cannot spawn officer with id '{officerId}'");
-                return;
-            }
-            PlaceUnit(officer.Value, position);
+            PlayerEventBus.Raise(EGameEvent.TurnEnd, new());
+        }
+        
+        void RefillEnergy(EventPayload payload)
+        {
+            ValuePayload<int> _payload = new(0);
+            PlayerEventBus.Raise(EGameEvent.RefillMoves, _payload);
+            CurrentMoves += _payload.Value;
         }
 
-        void PlaceUnit(KeyValuePair<uint, Unit> unit, Cell position)
+        void ClearRemainingMoves(EventPayload payload)
         {
-            Shape shape = unit.Value.Ocupation;
-            if(!CanPlaceUnit(shape, position))
-            {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Player.PlaceUnit - cannot place unit at {position.ToString()}");
-                return;
-            }
-
-            Board.Set(position, unit.Key);
-            if (shape.Offsets == null) return;
-            foreach (Cell extend in shape.Offsets)
-            {
-                Board.Set(extend, unit.Key);
-            }
-            unit.Value.UnitEventBus.Raise(EUnitEvent.Draft, new DraftPayload(position));
+            CurrentMoves = 0;
         }
 
-        KeyValuePair<uint, Unit>? SpawnUnit(string unitId)
-        {
-            Unit? unit = UnitFactory.GetUnit(unitId, this);
-            if (unit == null) 
-            {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"ShapeFactory:GetShape Player[{Id}] cannot spawn with id: {unitId}");
-                return null;
-            }
-            uint simId = SimulationSystem.NextId();
-            return new KeyValuePair<uint, Unit>( simId, unit );
-        }*/
     }
 }

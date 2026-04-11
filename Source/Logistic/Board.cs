@@ -43,6 +43,9 @@ namespace SimulationEngine.Source.Logistic
 
             return p;
         }
+        public bool IsInBounds(Cell coords) =>
+            coords.x >= 0 && coords.x < _width && coords.y >= 0 && coords.y < _height;
+
         public uint Get(Cell coords)
         {
             return _tiles[coords.x, coords.y];

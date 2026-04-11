@@ -31,6 +31,13 @@ namespace SimulationEngine.Source.Data.Units
         Dictionary<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> _abilities;
 
         public bool CanActivate { get { return Stats.GetStat(EStat.Energy) >= GetActivationCost(); } }
+        public bool CanMove { get 
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryMove, payload);
+                return !payload.Cancelled; 
+            } 
+        }
 
         public int X { get { return _position.x; } set { _position.x = value; } }
         public int Y { get { return _position.y; } set { _position.y = value; } }
