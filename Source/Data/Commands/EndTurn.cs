@@ -1,5 +1,6 @@
 ﻿using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
+using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +23,7 @@ namespace SimulationEngine.Source.Data.Commands
         public void Execute()
         {
             _currentGame.EndTurn();
+            SimulationSystem.CheckStateChain();
         }
     }
 }

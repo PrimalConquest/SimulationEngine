@@ -8,11 +8,11 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Commands
 {
-    internal class Activate : IGameCommand
+    internal class ActivateSpecial : IGameCommand
     {
         Player _player;
         uint _unitId;
-        public Activate(Player player, uint unitId)
+        public ActivateSpecial(Player player, uint unitId)
         {
             _player = player;
             _unitId = unitId;

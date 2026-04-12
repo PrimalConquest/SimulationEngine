@@ -43,6 +43,9 @@ namespace SimulationEngine.Source.Logistic
 
             return p;
         }
+        public int Width => _width;
+        public int Height => _height;
+
         public bool IsInBounds(Cell coords) =>
             coords.x >= 0 && coords.x < _width && coords.y >= 0 && coords.y < _height;
 

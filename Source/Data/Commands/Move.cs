@@ -1,9 +1,11 @@
 ﻿using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
+using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
+using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +23,7 @@ namespace SimulationEngine.Source.Data.Commands
         {
             _player = player;
             _pos = pos;
-            _direction = GetMoveDirection(direction);
+            _direction = Cell.GetMoveDirection(direction);
             _player.Units.TryGetValue(_player.Board.Get(_pos), out Unit unit);
             if (unit == null) { return; }
             _maxRepetitions = unit.GetStat(EStat.MoveSpeed);
@@ -40,7 +42,7 @@ namespace SimulationEngine.Source.Data.Commands
 
             _player.Units.TryGetValue(board.Get(_pos+_direction), out Unit swapUnit);
 
-            if (!unit.CanMove || !swapUnit.CanMove) return false;
+            if (!unit.CanMove || !swapUnit.CanDisplace) return false;
 
             if (unit.Ocupation.Offsets == null) return true;
 
@@ -74,29 +76,28 @@ namespace SimulationEngine.Source.Data.Commands
 
             foreach(Cell tile in shapeSnapshot)
             {
-                uint current = board.Get(unitAnchor + tile);
-                uint swapWith = board.Get(unitAnchor + tile + _direction);
+                Cell currentCell = unitAnchor + tile;
+                Cell swapCell = unitAnchor + tile + _direction;
 
-                board.Set(unitAnchor + tile, swapWith);
-                board.Set(unitAnchor + tile + _direction, swapWith);
+                uint current = board.Get(currentCell);
+                uint swapWith = board.Get(swapCell);
+
+                board.Set(currentCell, swapWith);
+                board.Set(swapCell, current);
+
+                SimulationSystem.CheckForMatchPositions.Add(currentCell);
+                SimulationSystem.CheckForMatchPositions.Add(swapCell);
+
+                unit.UnitEventBus.Raise(EUnitEvent.Move, new());//make it so it send the two swaped units
+                _player.Units.TryGetValue(board.Get(_pos), out Unit displacedUnit);
+                displacedUnit.UnitEventBus.Raise(EUnitEvent.Displace, new());//make it so it send the two swaped units
             }
-
             _maxRepetitions -= 1;
 
             if(_maxRepetitions>0 && CanExecute()) Execute();
+            else SimulationSystem.CheckStateChain();
         }
 
-        Cell GetMoveDirection(EDirection direction)
-        {
 
-            switch(direction)
-            {
-                case EDirection.Up : return new Cell { x = 0, y = 1 };
-                case EDirection.Down: return new Cell { x = 0, y = -1 };
-                case EDirection.Left: return new Cell { x = -1, y = 0 };
-                case EDirection.Right: return new Cell { x = 1, y = 0 };
-                default: return new Cell { x = 0, y = 0 };
-            }
-        }
     }
 }

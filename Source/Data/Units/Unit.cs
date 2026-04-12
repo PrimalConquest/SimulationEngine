@@ -38,6 +38,25 @@ namespace SimulationEngine.Source.Data.Units
                 return !payload.Cancelled; 
             } 
         }
+        public bool CanFall
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryFall, payload);
+                return !payload.Cancelled;
+            }
+        }
+
+        public bool CanDisplace
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryDisplace, payload);
+                return !payload.Cancelled;
+            }
+        }
 
         public int X { get { return _position.x; } set { _position.x = value; } }
         public int Y { get { return _position.y; } set { _position.y = value; } }

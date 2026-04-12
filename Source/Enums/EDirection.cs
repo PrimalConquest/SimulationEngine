@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Enums
 {
-    internal enum EDirection : byte
+    public enum EDirection : byte
     {
         Up,
         Down,

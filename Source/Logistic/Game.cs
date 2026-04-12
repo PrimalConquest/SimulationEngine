@@ -21,6 +21,7 @@ namespace SimulationEngine.Source.Logistic
         private int ActivePlayer {get; set; }
 
         public Player CurrentPlayer { get { return Players[ActivePlayer]; }  }
+        public Player OtherPlayer { get { return Players[GetEnemyPlayer(ActivePlayer)]; } }
 
         public Game(Cell boardSize)
         {
