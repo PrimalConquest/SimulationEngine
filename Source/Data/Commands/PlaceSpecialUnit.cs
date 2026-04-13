@@ -12,7 +12,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Commands
 {
-    internal class PlaceSpecialUnit : IGameCommand
+    public class PlaceSpecialUnit : IGameCommand
     {
 
         Player _player;
@@ -30,6 +30,8 @@ namespace SimulationEngine.Source.Data.Commands
 
         public bool CanExecute()
         {
+            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+
             if (_player.BoardUnits.ContainsKey(_unitId)) return false;
 
             if(!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return false;
@@ -82,6 +84,8 @@ namespace SimulationEngine.Source.Data.Commands
 
             _player.BoardUnits.Add(_unitId, unit);
             unit.UnitEventBus.Raise(EUnitEvent.Draft, new DraftPayload(_pos));
+
+            SimulationSystem.CheckStateChain();
         }
     }
 }

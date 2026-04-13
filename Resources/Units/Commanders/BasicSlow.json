@@ -1,0 +1,10 @@
+{
+  "Color": "Gray",
+  "ShapeId": "Square_2",
+  "StatSheetId": "CommanderSheets.BasicSlow",
+  "AbilityMap": {
+  },
+  "GlobalAbilityMap": {
+    "TurnStart" :  "GrantMovesSlow"
+  }
+}

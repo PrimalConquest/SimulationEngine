@@ -1,6 +1,9 @@
 {
   "Health": 5,
-  "Energy": 5,
   "Damage": 5,
-  "Toll": 5
+  "Energy": 5,
+  "MaxEnergy": 5,
+  "Toll": 5,
+  "MoveSpeed": 1,
+  "MoveCost": 1
 }

@@ -30,6 +30,8 @@ namespace SimulationEngine.Source.Data.Units
 
         Dictionary<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> _abilities;
 
+        Dictionary<Ability, KeyValuePair<EGameEvent, EventCallback<EventPayload>>> _globalAbilities;
+
         public bool CanActivate { get { return Stats.GetStat(EStat.Energy) >= GetActivationCost(); } }
         public bool CanMove { get 
             {
@@ -102,6 +104,7 @@ namespace SimulationEngine.Source.Data.Units
             Stats = stats;
             Ocupation = ocupation;
             _abilities = new();
+            _globalAbilities = new();
 
             UnitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
 
@@ -180,6 +183,13 @@ namespace SimulationEngine.Source.Data.Units
             UnitEventBus.AddListener(activation, hook.Value);
         }
 
+        public void GrantGlobalAbility(EGameEvent activation, Ability ability)
+        {
+            KeyValuePair<EGameEvent, EventCallback<EventPayload>> hook = new(activation, new(ability.Activate, ability.Priority));
+            _globalAbilities.Add(ability, hook);
+            OwningPlayer.PlayerEventBus.AddListener(activation, hook.Value);
+        }
+
         public void RemoveAbility(Ability ability)
         {
             _abilities.TryGetValue(ability, out KeyValuePair<EUnitEvent, EventCallback<EventPayload>> hook);
@@ -190,6 +200,16 @@ namespace SimulationEngine.Source.Data.Units
             }
             UnitEventBus.RemoveListener(hook.Key, hook.Value);
         }
+        public void RemoveGloablAbility(Ability ability)
+        {
+            _globalAbilities.TryGetValue(ability, out KeyValuePair<EGameEvent, EventCallback<EventPayload>> hook);
+            if (hook.Value == null)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveGlobalAbility - no ability");
+                return;
+            }
+            OwningPlayer.PlayerEventBus.RemoveListener(hook.Key, hook.Value);
+        }
 
         public Unit DeepCopy()
         {
@@ -198,6 +218,11 @@ namespace SimulationEngine.Source.Data.Units
             foreach (KeyValuePair<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> ability in _abilities)
             {
                 copy.GrantAbility(ability.Value.Key, ability.Key.DeepCopy(copy));
+            }
+
+            foreach (KeyValuePair<Ability, KeyValuePair<EGameEvent, EventCallback<EventPayload>>> ability in _globalAbilities)
+            {
+                copy.GrantGlobalAbility(ability.Value.Key, ability.Key.DeepCopy(copy));
             }
 
             return copy;

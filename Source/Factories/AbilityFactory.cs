@@ -34,12 +34,18 @@ namespace SimulationEngine.Source.Factories
 
             ITargetingScheme? scheme = TargetingSchemeFactory.GetTargetingScheme(data.TargetingId);
 
-            var type = Type.GetType("SimulationEngine.Source.Data.Abilities." + data.Class);
+            Type? type = Type.GetType("SimulationEngine.Source.Data.Abilities." + data.Class);
+            if (type == null)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"AbilityFactory.GetAbility - Unknown ability class '{data.Class}' in '{abilityId}'");
+                return null;
+            }
+
             Ability? ability = (Ability)Activator.CreateInstance(type, owner, data.Priority, scheme);
 
             if (ability == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"AbilityFactory.GetAbility - Unknown ability class '{data.Class}' in '{abilityId}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"AbilityFactory.GetAbility - Cannot create ability class '{data.Class}' in '{abilityId}'");
                 return null;
             }
 

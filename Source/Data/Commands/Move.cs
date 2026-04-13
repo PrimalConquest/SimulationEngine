@@ -2,6 +2,7 @@
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
+using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Interfaces;
@@ -13,7 +14,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Data.Commands
 {
-    internal class Move : IGameCommand
+    public class Move : IGameCommand
     {
         Player _player;
         uint _unitId;
@@ -26,13 +27,19 @@ namespace SimulationEngine.Source.Data.Commands
             _unitId = _player.Board.Get(pos);
             _direction = Cell.GetMoveDirection(direction);
             _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
-            if (unit == null) { return; }
+            if (unit == null) 
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Move - Trying to move pos[x:{pos.x}, y:{pos.y}] unit[{_unitId}] hat is not on the board");
+                return; 
+            }
             _maxRepetitions = unit.GetStat(EStat.MoveSpeed);
             _moveCost = unit.GetStat(EStat.MoveCost);
         }
 
         public bool CanExecute()
         {
+            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+
             if (_player.CurrentMoves < _moveCost) return false;
 
             Board board = _player.Board;

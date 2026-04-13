@@ -1,0 +1,9 @@
+{
+  "Class": "GrantStat",
+  "ActivationCost": 15,
+  "Priority": 2,
+  "TargetingId": "TargetAllyCommander",
+  "Specific": {
+    "Health": 20
+  }
+}

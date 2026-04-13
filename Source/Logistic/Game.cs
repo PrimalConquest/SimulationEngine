@@ -34,17 +34,21 @@ namespace SimulationEngine.Source.Logistic
             _boardSize = boardSize;
         }
 
-        public void RegisterPlayer(string playerName, string commanderId, HashSet<string> officerIds)
+        public KeyValuePair<Player, string>? RegisterPlayer(string playerName, string commanderId, HashSet<string> officerIds)
         {
             if(_initilized == false)
             {
                 LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Cannot register players before initializatiuon");
-                return;
+                return null;
             }
 
             Player player = new(SimulationSystem.NextId(), commanderId, officerIds, _boardSize);
 
-            Players.Add(new(player, playerName));
+            KeyValuePair<Player, string> p = new(player, playerName);
+
+            Players.Add(p);
+
+            return p;
         }
 
         public int GetEnemyPlayer(int playerId)

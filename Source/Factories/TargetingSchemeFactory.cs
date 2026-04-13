@@ -16,6 +16,8 @@ namespace SimulationEngine.Source.Factories
 
         public static ITargetingScheme? GetTargetingScheme(string schemeId)
         {
+            if(schemeId == "null") return null;
+
             if(_parsedSchemes.ContainsKey(schemeId))
             {
                 return _parsedSchemes[schemeId];

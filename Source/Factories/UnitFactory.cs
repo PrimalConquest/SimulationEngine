@@ -68,6 +68,23 @@ namespace SimulationEngine.Source.Factories
                 unit.GrantAbility(unitEvent.Value, ability);
             }
 
+            foreach (KeyValuePair<string, string> pair in data.GlobalAbilityMap)
+            {
+                EGameEvent? gameEvent = GameEventHelper.ToGameEvent(pair.Key);
+                if (gameEvent == null)
+                {
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse game event '{pair.Key}' for ability '{pair.Value}'");
+                    continue;
+                }
+                Ability? ability = AbilityFactory.GetAbility(pair.Value, unit);
+                if (ability == null)
+                {
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse ability '{pair.Value}'");
+                    continue;
+                }
+                unit.GrantGlobalAbility(gameEvent.Value, ability);
+            }
+
             _parsedUnits.Add(unitId, unit);
             return unit;
         }

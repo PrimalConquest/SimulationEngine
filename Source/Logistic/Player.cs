@@ -1,7 +1,9 @@
-﻿using SimulationEngine.Source.Data.Geometry;
+﻿using SimulationEngine.Source.Data.Abilities;
+using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
+using SimulationEngine.Source.Events;
 using SimulationEngine.Source.Events.Busses;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories;
@@ -21,9 +23,13 @@ namespace SimulationEngine.Source.Logistic
         public Board Board { get; private set; }
 
         public uint CommanderId { get; private set; }
+        public Unit Commander {
+            get {
+                return SpecialUnits[CommanderId];
+            } 
+        }
         public Dictionary<uint, Unit> SpecialUnits { get; private set; }
         public Dictionary<uint, Unit> BoardUnits { get; set; }
-
 
         public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
         public int CurrentMoves { get; set; }
@@ -35,6 +41,7 @@ namespace SimulationEngine.Source.Logistic
             Board.Clear();
             SpecialUnits = new();
             BoardUnits = new();
+
 
             PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
 
@@ -50,7 +57,7 @@ namespace SimulationEngine.Source.Logistic
                 return;
             }
             CommanderId = commander.Value.Key;
-            SpecialUnits.Append(commander.Value);
+            SpecialUnits.Add(commander.Value.Key, commander.Value.Value);
 
             foreach (string offId in officerIds)
             {
@@ -60,15 +67,10 @@ namespace SimulationEngine.Source.Logistic
                     LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create unit with id '{offId}' for player with id '{Id}'");
                     continue;
                 }
-                SpecialUnits.Append(unit.Value);
+                SpecialUnits.Add(unit.Value.Key, unit.Value.Value);
             }
 
-            for (int i = 0; i < boardSize.x; i++)
-            { 
-                SimulationSystem.RefillColumnsIndexes.Add(i);
-            }
-
-            SimulationSystem.CheckStateChain();
+            SimulationSystem.SetupBoard(this);
         }
 
         public void OnTurnStart()
@@ -84,6 +86,6 @@ namespace SimulationEngine.Source.Logistic
             PlayerEventBus.Raise(EGameEvent.TurnEnd, _payload);
             CurrentMoves = _payload.Value;
         }
-        
+
     }
 }

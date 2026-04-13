@@ -8,6 +8,7 @@ using SimulationEngine.Source.Factories;
 using SimulationEngine.Source.Logistic;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace SimulationEngine.Source.Systems
@@ -230,6 +231,24 @@ namespace SimulationEngine.Source.Systems
                 activated.Add(id);
             }
         }
+
+        public static void SetupBoard(Player owner)
+        {
+            Board board = owner.Board;
+            for(int i=0; i< board.Width; i++)
+            {
+                for (int j = 0; j < board.Height; j++)
+                {
+                    Cell pos = new Cell { x = i, y = j };
+                    KeyValuePair<uint, Unit>? newTroop = SpawnUnit(TroopId, owner);
+                    if (newTroop == null) continue;
+                    owner.BoardUnits.Add(newTroop.Value.Key, newTroop.Value.Value);
+                    newTroop.Value.Value.Position = pos;
+                    board.Set(pos, newTroop.Value.Key);
+                }
+            }
+        }
+
         private static void RefillBoard()
         {
             Player player = ActiveGame.CurrentPlayer;

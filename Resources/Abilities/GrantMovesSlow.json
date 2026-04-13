@@ -1,0 +1,9 @@
+﻿{
+  "Class": "GrantMoves",
+  "ActivationCost": 0,
+  "Priority": 2,
+  "TargetingId": "null",
+  "Specific": {
+    "Amount": 2
+  }
+}

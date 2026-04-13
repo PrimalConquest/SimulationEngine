@@ -8,21 +8,21 @@ using System.Windows.Input;
 
 namespace SimulationEngine.Source.Data.Commands
 {
-    internal class EndTurn : IGameCommand
+    public class EndTurn : IGameCommand
     {
-        Game _currentGame;
+        Player _player;
 
-        public EndTurn(Game currentGame)
+        public EndTurn(Player playerEnding)
         {
-            _currentGame = currentGame;
+            _player = playerEnding;
         }
         public bool CanExecute()
         {
-            return true;
+            return SimulationSystem.ActiveGame.CurrentPlayer == _player;
         }
         public void Execute()
         {
-            _currentGame.EndTurn();
+            SimulationSystem.ActiveGame.EndTurn();
             SimulationSystem.CheckStateChain();
         }
     }
