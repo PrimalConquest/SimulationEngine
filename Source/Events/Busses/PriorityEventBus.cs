@@ -44,7 +44,8 @@ namespace SimulationEngine.Source.Events.Busses
         /// </summary>
         public bool AddListener(T eventType, EventCallback<P> callback, bool enforceEventCreation = false)
         {
-            if (!_channels.TryGetValue(eventType, out var list))
+            List<EventCallback<P>> list;
+            if (!_channels.TryGetValue(eventType, out list))
             {
                 if (!enforceEventCreation)
                 {
@@ -54,6 +55,7 @@ namespace SimulationEngine.Source.Events.Busses
                 }
 
                 RegisterChannel(eventType);
+                _channels.TryGetValue(eventType, out list);
             }
 
             int i = 0;

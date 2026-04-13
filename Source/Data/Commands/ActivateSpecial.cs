@@ -19,15 +19,15 @@ namespace SimulationEngine.Source.Data.Commands
         }
         public bool CanExecute()
         {
-            if(!_player.PlacedSpecialUnits.Contains(_unitId)) return false;
-            _player.Units.TryGetValue(_unitId, out Unit unit);
+            if(!_player.BoardUnits.ContainsKey(_unitId)) return false;
+            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
             if (unit == null) return false;
             return unit.CanActivate;
         }
 
         public void Execute()
         {
-            _player.Units.TryGetValue(_unitId, out Unit unit);
+            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
             if (unit == null) return;
             unit.UnitEventBus.Raise(EUnitEvent.Activate, new());
         }

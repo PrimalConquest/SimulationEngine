@@ -58,6 +58,37 @@ namespace SimulationEngine.Source.Data.Units
             }
         }
 
+        public bool CanBeOverriden
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryOverride, payload);
+                return !payload.Cancelled;
+            }
+        }
+
+
+        public bool CanBeDrafted
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryDraft, payload);
+                return !payload.Cancelled;
+            }
+        }
+
+        public bool CanRetreat
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryRetreat, payload);
+                return !payload.Cancelled;
+            }
+        }
+
         public int X { get { return _position.x; } set { _position.x = value; } }
         public int Y { get { return _position.y; } set { _position.y = value; } }
         public Cell Position { get { return _position; } set { _position = value; } }
@@ -83,14 +114,16 @@ namespace SimulationEngine.Source.Data.Units
             Stats.ListenOnPostStatChange(EStat.Energy, new(OnEnergyChanged, 2));
 
             UnitEventBus.AddListener(EUnitEvent.TryActivate, new(Activate));
+
+            UnitEventBus.AddListener(EUnitEvent.Move, new(OnMoved));
+            UnitEventBus.AddListener(EUnitEvent.Fall, new(OnMoved));
+            UnitEventBus.AddListener(EUnitEvent.Displace, new(OnMoved));
         }
 
         public void Activate(EventPayload payload)
         {
-            if(!CanActivate)
-            {
-                payload.Cancelled = false;
-            }
+            payload.Cancelled = !CanActivate;
+            
             UnitEventBus.Raise(EUnitEvent.Activate, payload);
         }
 
@@ -120,6 +153,12 @@ namespace SimulationEngine.Source.Data.Units
             }
             int max = Stats.GetStat(EStat.MaxEnergy);
             if (payload.Value > max) Stats.SetStat(EStat.Energy, max);
+        }
+        private void OnMoved(EventPayload payload)
+        {
+            ValueChangedPayload<Cell>? _payload = payload as ValueChangedPayload<Cell>;
+            if (_payload == null) return;
+            Position = _payload.Value;
         }
 
         public void RecieveDamage(Damage damage)
@@ -154,8 +193,16 @@ namespace SimulationEngine.Source.Data.Units
 
         public Unit DeepCopy()
         {
-            return new(OwningPlayer, Color, Stats.DeepCopy(), Ocupation);
+            Unit copy = new(OwningPlayer, Color, Stats.DeepCopy(), Ocupation);
+            
+            foreach (KeyValuePair<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> ability in _abilities)
+            {
+                copy.GrantAbility(ability.Value.Key, ability.Key.DeepCopy(copy));
+            }
+
+            return copy;
         }
+            
 
         virtual public Unit DeepCopy(Player owningPlayer)
         {

@@ -12,7 +12,9 @@ namespace SimulationEngine.Source.Enums.EventTypes
         TryPromote,
         Promote,
         Die,
+        TryDraft,
         Draft,
+        TryRetreat,
         Retreat,
         TryMove,
         Move,
@@ -20,6 +22,8 @@ namespace SimulationEngine.Source.Enums.EventTypes
         Fall,
         TryDisplace,
         Displace,
+        TryOverride,
+        Override,
         RecieveDamage,
         RecieveEffect
     }

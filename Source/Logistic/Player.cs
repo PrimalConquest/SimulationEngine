@@ -18,11 +18,11 @@ namespace SimulationEngine.Source.Logistic
     {
         public uint Id { get; private set; }
         public Board Board { get; private set; }
-        public Dictionary<uint, Unit> Commanders { get; private set; }
-        public Dictionary<uint, Unit> Officers { get; private set; }
-        public Dictionary<uint, Unit> Units { get; set; }
 
-        public List<uint> PlacedSpecialUnits { get; private set; }
+        public uint CommanderId { get; private set; }
+        public Dictionary<uint, Unit> SpecialUnits { get; private set; }
+        public Dictionary<uint, Unit> BoardUnits { get; set; }
+
 
         public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
         public int CurrentMoves { get; set; }
@@ -31,10 +31,8 @@ namespace SimulationEngine.Source.Logistic
         {
             Id = id;
             Board = board;
-            Commanders = new();
-            Officers = officers;
-            Units = new();
-            PlacedSpecialUnits = new();
+            SpecialUnits = new();
+            BoardUnits = new();
 
             PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
 
@@ -42,31 +40,21 @@ namespace SimulationEngine.Source.Logistic
             {
                 PlayerEventBus.RegisterChannel(type);
             }
-            PlayerEventBus.AddListener(EGameEvent.TurnStart, new(ClearRemainingMoves, int.MaxValue));
-            PlayerEventBus.AddListener(EGameEvent.TurnEnd, new(ClearRemainingMoves, int.MaxValue));
         }
 
         public void OnTurnStart()
         {
-            PlayerEventBus.Raise(EGameEvent.TurnStart, new());
+            ValueChangedPayload<int> _payload = new(0, CurrentMoves);
+            PlayerEventBus.Raise(EGameEvent.TurnStart, _payload);
+            CurrentMoves = _payload.Value;
         }
 
         public void OnTurnEnd()
         {
-            PlayerEventBus.Raise(EGameEvent.TurnEnd, new());
+            ValueChangedPayload<int> _payload = new(0, CurrentMoves);
+            PlayerEventBus.Raise(EGameEvent.TurnEnd, _payload);
+            CurrentMoves = _payload.Value;
         }
         
-        void RefillEnergy(EventPayload payload)
-        {
-            ValuePayload<int> _payload = new(0);
-            PlayerEventBus.Raise(EGameEvent.RefillMoves, _payload);
-            CurrentMoves += _payload.Value;
-        }
-
-        void ClearRemainingMoves(EventPayload payload)
-        {
-            CurrentMoves = 0;
-        }
-
     }
 }

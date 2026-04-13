@@ -69,7 +69,7 @@ namespace SimulationEngine.Source.Factories
             }
 
             _parsedUnits.Add(unitId, unit);
-            return null;
+            return unit;
         }
     }
 }

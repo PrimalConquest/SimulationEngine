@@ -30,7 +30,7 @@ namespace SimulationEngine.Source.Systems
         public static HashSet<int> RefillColumnsIndexes { get; private set; }
 
         // Columns on the enemy board that need gravity applied after an attack this turn
-        public static List<uint> HitEnemyUnits { get; private set; }
+        public static List<uint> HitEnemySpecialUnits { get; private set; }
 
         public static int Seed 
         {
@@ -59,7 +59,7 @@ namespace SimulationEngine.Source.Systems
             CheckForMatchPositions = new();
             PositionsToActivate = new();
             RefillColumnsIndexes = new();
-            HitEnemyUnits = new();
+            HitEnemySpecialUnits = new();
         }
 
         public static KeyValuePair<uint, Unit>? SpawnUnit(string unitId, Player owner)
@@ -130,7 +130,7 @@ namespace SimulationEngine.Source.Systems
 
                 uint originId = board.Get(origin);
                 if (originId == 0) continue;
-                if (!player.Units.TryGetValue(originId, out Unit originUnit)) continue;
+                if (!player.BoardUnits.TryGetValue(originId, out Unit originUnit)) continue;
 
                 EColor color = originUnit.Color;
 
@@ -144,7 +144,7 @@ namespace SimulationEngine.Source.Systems
                     {
                         uint id = board.Get(cursor);
                         if (id == 0) break;
-                        if (!player.Units.TryGetValue(id, out Unit u) || u.Color != color) break;
+                        if (!player.BoardUnits.TryGetValue(id, out Unit u) || u.Color != color) break;
                         arms[i].Add(cursor);
                         cursor = cursor + cardinals[i];
                     }
@@ -161,7 +161,7 @@ namespace SimulationEngine.Source.Systems
                     if (!board.IsInBounds(diag)) continue;
                     uint diagId = board.Get(diag);
                     if (diagId == 0) continue;
-                    if (!player.Units.TryGetValue(diagId, out Unit diagUnit) || diagUnit.Color != color) continue;
+                    if (!player.BoardUnits.TryGetValue(diagId, out Unit diagUnit) || diagUnit.Color != color) continue;
                     group.Value.Add(diag);
                     group.Value.Add(origin + cardinals[a]);
                     group.Value.Add(origin + cardinals[b]);
@@ -189,7 +189,7 @@ namespace SimulationEngine.Source.Systems
                 alreadyMatched.Add(group.Key);
                 alreadyMatched.AddRange(group.Value);
 
-                PositionsToActivate.Append(group);
+                PositionsToActivate.Add(group.Key, group.Value);
             }
         }
 
@@ -210,19 +210,23 @@ namespace SimulationEngine.Source.Systems
                 {
                     id = board.Get(cell);
                     if (id == 0 || activated.Contains(id)) continue;
-                    if (!player.Units.TryGetValue(id, out unit)) continue;
+                    if (!player.BoardUnits.TryGetValue(id, out unit)) continue;
 
                     unit.UnitEventBus.Raise(EUnitEvent.TryActivate, new EventPayload());
                     activated.Add(id);
                 }
 
-                if (group.Value.Count < 3) continue;
-
                 id = board.Get(group.Key);
                 if (id == 0 || activated.Contains(id)) continue;
-                if (!player.Units.TryGetValue(id, out unit)) continue;
+                if (!player.BoardUnits.TryGetValue(id, out unit)) continue;
 
-                unit.UnitEventBus.Raise(EUnitEvent.Promote, new ValuePayload<int>(group.Value.Count-3));
+                if (group.Value.Count > 2)
+                {
+                    unit.UnitEventBus.Raise(EUnitEvent.Promote, new ValuePayload<int>(group.Value.Count - 3));
+                }else
+                {
+                    unit.UnitEventBus.Raise(EUnitEvent.Promote, new EventPayload());
+                }
                 activated.Add(id);
             }
         }
@@ -238,13 +242,13 @@ namespace SimulationEngine.Source.Systems
             {
                 // Collect every unit in this column, bottom to top
                 List<(uint, Cell, Unit)> units = new();
-                for (int y = 0; y < board.Height; y--)
+                for (int y = 0; y < board.Height; y++)
                 {
                     Cell pos = new Cell { x = col, y = y };
                     uint id = board.Get(pos);
                     if (id == 0) continue;
 
-                    player.Units.TryGetValue(id, out Unit fallingUnit);
+                    if(!player.BoardUnits.TryGetValue(id, out Unit fallingUnit)) continue;
 
                     if (!fallingUnit.CanFall) continue;
 
@@ -254,6 +258,7 @@ namespace SimulationEngine.Source.Systems
 
                 for(int y = board.Height-1; y>=0; y--)
                 {
+                    int next = units.Count - 1;
                     Cell pos = new Cell{x=col, y=y};
                     if(board.Get(pos) != 0) continue;
 
@@ -261,10 +266,11 @@ namespace SimulationEngine.Source.Systems
 
                     if (units.Count > 0)
                     {
-                        board.Set(pos, units[units.Count - 1].Item1);
+                        
+                        board.Set(pos, units[next].Item1);
 
-                        // make it so the payload recieves Item2 (prev position) and pos (next positin)
-                        units[units.Count - 1].Item3.UnitEventBus.Raise(EUnitEvent.Fall, new()); 
+                        // payload recieves Item2 (prev position) and pos (next positin)
+                        units[units.Count - 1].Item3.UnitEventBus.Raise(EUnitEvent.Fall, new ValueChangedPayload<Cell>(pos, units[next].Item2)); 
 
                         units.RemoveAt(units.Count - 1);
 
@@ -273,7 +279,9 @@ namespace SimulationEngine.Source.Systems
 
                     KeyValuePair<uint, Unit>? newTroop = SpawnUnit(TroopId, player);
                     if(newTroop == null) continue;
-                    player.Units.Append(newTroop.Value);
+                    player.BoardUnits.Add(newTroop.Value.Key, newTroop.Value.Value);
+                    newTroop.Value.Value.Position = pos;
+                    board.Set(pos, newTroop.Value.Key);
                 }
             }
         }
@@ -285,18 +293,29 @@ namespace SimulationEngine.Source.Systems
             Player enemy = ActiveGame.OtherPlayer;
             Board board = enemy.Board;
 
-            List<uint> units = new (HitEnemyUnits);
-            HitEnemyUnits.Clear();
+            List<uint> units = new (HitEnemySpecialUnits);
+            HitEnemySpecialUnits.Clear();
 
-            units.OrderByDescending(u =>
+            Cell up = Cell.GetMoveDirection(EDirection.Up);
+
+            units.RemoveAll((id) => !enemy.BoardUnits.TryGetValue(id, out Unit unit));
+
+            units = units.OrderByDescending(u =>
             {
-                if(!enemy.Units.TryGetValue(u, out Unit unit)) return 0;
-            });
+                enemy.BoardUnits.TryGetValue(u, out Unit unit);
+                List<Cell> shapeshanpshot = new();
+                shapeshanpshot.Add(new Cell { x = 0, y = 0 });
+                if (unit.Ocupation.Offsets != null) shapeshanpshot.AddRange(unit.Ocupation.Offsets);
+                shapeshanpshot = shapeshanpshot.OrderByDescending(tile => (tile * up).Magnitude()).ToList();
+
+                return unit.Position.y + shapeshanpshot[0].y;
+            }).ToList();
 
             foreach (uint unitId in units)
             {
+                enemy.BoardUnits.TryGetValue(unitId, out Unit unit);
 
-                if(!enemy.Units.TryGetValue(unitId, out Unit unit)) continue;
+                if(!unit.CanDisplace) continue;
 
                 Cell unitAnchor = unit.Position;
 
@@ -304,11 +323,18 @@ namespace SimulationEngine.Source.Systems
                 shapeSnapshot.Add(new Cell { x = 0, y = 0 });
                 if (unit.Ocupation.Offsets != null) shapeSnapshot.AddRange(unit.Ocupation.Offsets);
 
+                shapeSnapshot = shapeSnapshot.OrderByDescending(cell => (cell * up).Magnitude()).ToList();
+
                 bool canMove = true;
 
                 foreach(Cell tile in shapeSnapshot)
                 {
-                    Cell checkpositioin = unitAnchor + Cell.GetMoveDirection(EDirection.Up);
+                    Cell checkpositioin = unitAnchor + tile + up;
+                    if(!board.IsInBounds(checkpositioin))
+                    {
+                        canMove = false;
+                        break;
+                    }
                     uint checkId = board.Get(checkpositioin);
                     if (checkId != 0 && checkId != unitId)
                     {
@@ -318,45 +344,22 @@ namespace SimulationEngine.Source.Systems
                 }
 
                 if (!canMove) continue;
-                
 
-
-
-
-                List<(int y, uint id, bool isFixed)> units = new List<(int, uint, bool)>();
-                for (int y = 0; y < board.Height; y++)
+                foreach (Cell tile in shapeSnapshot)
                 {
-                    uint id = board.Get(new Cell { x = col, y = y });
-                    if (id == 0) continue;
-                    bool isFixed = enemy.Officers.ContainsKey(id) || enemy.Commanders.ContainsKey(id);
-                    units.Add((y, id, isFixed));
+                    Cell currentCell = unitAnchor + tile;
+                    Cell swapCell = unitAnchor + tile + up;
+
+                    uint current = board.Get(currentCell);
+
+                    board.Set(currentCell, 0);
+                    board.Set(swapCell, current);
+
+                    SimulationSystem.CheckForMatchPositions.Add(currentCell);
+
                 }
+                unit.UnitEventBus.Raise(EUnitEvent.Displace, new ValueChangedPayload<Cell>(unitAnchor+up, unitAnchor));
 
-                for (int y = 0; y < board.Height; y++)
-                    board.Set(new Cell { x = col, y = y }, 0);
-
-                HashSet<int> fixedYs = new HashSet<int>();
-                foreach ((int y, uint id, bool isFixed) entry in units)
-                {
-                    if (!entry.isFixed) continue;
-                    board.Set(new Cell { x = col, y = entry.y }, entry.id);
-                    fixedYs.Add(entry.y);
-                }
-
-                int writeY = 0;
-                foreach ((int y, uint id, bool isFixed) entry in units)
-                {
-                    if (entry.isFixed) continue;
-                    while (writeY < board.Height && fixedYs.Contains(writeY)) writeY++;
-                    if (writeY >= board.Height) break;
-
-                    Cell dest = new Cell { x = col, y = writeY };
-                    board.Set(dest, entry.id);
-                    enemy.Units[entry.id].Y = writeY;
-                    CheckForMatchPositions.Add(dest);
-                    writeY++;
-                }
-                // No new spawns on the enemy board — gaps remain until their own turn refills them
             }
         }
     }
