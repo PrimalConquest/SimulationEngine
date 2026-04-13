@@ -55,7 +55,7 @@ namespace SimulationEngine.Source.Systems
         static SimulationSystem()
         {
             Seed = new Random().Next();
-            ActiveGame = new(new());
+            ActiveGame = new(0, new Cell{ x=0,y=0});
             CheckForMatchPositions = new();
             PositionsToActivate = new();
             RefillColumnsIndexes = new();

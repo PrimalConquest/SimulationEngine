@@ -16,22 +16,35 @@ namespace SimulationEngine.Source.Logistic
 {
     public class Game
     {
+        int _numPlayers;
+        bool _initilized;
+        Cell _boardSize;
+        int ActivePlayer { get; set; }
 
-        public List<Player> Players { get; private set; }
-        private int ActivePlayer {get; set; }
+        public List<KeyValuePair<Player, string>> Players { get; private set; }
+        public Player CurrentPlayer { get { return Players[ActivePlayer].Key; }  }
+        public Player OtherPlayer { get { return Players[GetEnemyPlayer(ActivePlayer)].Key; } }
 
-        public Player CurrentPlayer { get { return Players[ActivePlayer]; }  }
-        public Player OtherPlayer { get { return Players[GetEnemyPlayer(ActivePlayer)]; } }
-
-        public Game(Cell boardSize)
+        public Game(int numPlayers, Cell boardSize)
         {
             Players = new();
+            ActivePlayer = -1;
+            _initilized = false;
+            _numPlayers = numPlayers;
+            _boardSize = boardSize;
         }
 
-        void RegisterPlayer(Player player)
+        public void RegisterPlayer(string playerName, string commanderId, HashSet<string> officerIds)
         {
-            Players.Add(player);
-            
+            if(_initilized == false)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Cannot register players before initializatiuon");
+                return;
+            }
+
+            Player player = new(SimulationSystem.NextId(), commanderId, officerIds, _boardSize);
+
+            Players.Add(new(player, playerName));
         }
 
         public int GetEnemyPlayer(int playerId)
@@ -39,10 +52,10 @@ namespace SimulationEngine.Source.Logistic
             return (playerId + 1) % Players.Count;
         }
 
-        void InitGame()
+        public void InitGame()
         {
             SimulationSystem.Init(SimulationSystem.RandomInt(), 1, this);
-            ActivePlayer = SimulationSystem.RandomInt() % Players.Count;
+            _initilized = true;
         }
 
         void StartTurn()
@@ -59,13 +72,16 @@ namespace SimulationEngine.Source.Logistic
 
         public void Play()
         {
-           
-            StartTurn();
-            
-        }
 
-        public void Advance(ICommand command)
-        {
+            if(Players.Count != _numPlayers)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Cannot start game - {Players.Count}/{_numPlayers} players");
+                return;
+            }
+
+            ActivePlayer = SimulationSystem.RandomInt() % Players.Count;
+
+            StartTurn();
             
         }
 

@@ -10,6 +10,7 @@ using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace SimulationEngine.Source.Logistic
@@ -27,10 +28,11 @@ namespace SimulationEngine.Source.Logistic
         public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
         public int CurrentMoves { get; set; }
 
-        public Player(uint id, Dictionary<string, Cell> commanderIds, Dictionary<uint, Unit> officers, Board board)
+        public Player(uint id, string commanderId, HashSet<string> officerIds, Cell boardSize)
         {
             Id = id;
-            Board = board;
+            Board = new Board(boardSize.x, boardSize.y);
+            Board.Clear();
             SpecialUnits = new();
             BoardUnits = new();
 
@@ -40,6 +42,33 @@ namespace SimulationEngine.Source.Logistic
             {
                 PlayerEventBus.RegisterChannel(type);
             }
+
+            KeyValuePair<uint, Unit>? commander = SimulationSystem.SpawnUnit(commanderId, this);
+            if (commander == null)
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create commander with id '{commanderId}' for player with id '{Id}'");
+                return;
+            }
+            CommanderId = commander.Value.Key;
+            SpecialUnits.Append(commander.Value);
+
+            foreach (string offId in officerIds)
+            {
+                KeyValuePair<uint, Unit>? unit = SimulationSystem.SpawnUnit(offId, this);
+                if (unit == null)
+                {
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create unit with id '{offId}' for player with id '{Id}'");
+                    continue;
+                }
+                SpecialUnits.Append(unit.Value);
+            }
+
+            for (int i = 0; i < boardSize.x; i++)
+            { 
+                SimulationSystem.RefillColumnsIndexes.Add(i);
+            }
+
+            SimulationSystem.CheckStateChain();
         }
 
         public void OnTurnStart()
