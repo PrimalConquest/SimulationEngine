@@ -1,9 +1,46 @@
 {
-  "Tile":              { "width": 1, "height": 1 },
-  "Line_Horizontal_2": { "width": 2, "height": 1 },
-  "Line_Vertical_2":   { "width": 1, "height": 2 },
-  "Square_2":          { "width": 2, "height": 2 },
-  "Square_3":          { "width": 3, "height": 3 },
-  "Rectangle_3x2":     { "width": 3, "height": 2 },
-  "Rectangle_2x3":     { "width": 2, "height": 3 }
+  "Tile": {
+    "width": 1,
+    "height": 1
+  },
+  "Line_Horizontal_2": {
+    "width": 2,
+    "height": 1
+  },
+  "Line_Horizontal_3": {
+    "width": 3,
+    "height": 1
+  },
+  "Line_Horizontal_4": {
+    "width": 4,
+    "height": 1
+  },
+  "Line_Vertical_2": {
+    "width": 1,
+    "height": 2
+  },
+  "Line_Vertical_3": {
+    "width": 1,
+    "height": 3
+  },
+  "Line_Vertical_4": {
+    "width": 1,
+    "height": 4
+  },
+  "Square_2": {
+    "width": 2,
+    "height": 2
+  },
+  "Square_3": {
+    "width": 3,
+    "height": 3
+  },
+  "Rectangle_3x2": {
+    "width": 3,
+    "height": 2
+  },
+  "Rectangle_2x3": {
+    "width": 2,
+    "height": 3
+  }
 }

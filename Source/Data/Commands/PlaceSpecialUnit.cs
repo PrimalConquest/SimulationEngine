@@ -33,16 +33,19 @@ namespace SimulationEngine.Source.Data.Commands
 
             Board board = _player.Board;
 
-            foreach (Cell offset in unit.Ocupation.GetOffsets())
+            for(int x = 0; x<unit.Ocupation.Width; x++)
             {
-                Cell cell = _pos + offset;
-                if (!board.IsInBounds(cell)) return false;
+                for (int y = 0; y < unit.Ocupation.Height; y++)
+                {
+                    Cell cell = _pos + new Cell { x=x, y=y};
+                    if (!board.IsInBounds(cell)) return false;
 
-                uint occupantId = board.Get(cell);
-                if (occupantId == 0) continue;
+                    uint occupantId = board.Get(cell);
+                    if (occupantId == 0) continue;
 
-                if (!_player.BoardUnits.TryGetValue(occupantId, out Unit occupant) || !occupant.CanBeOverriden)
-                    return false;
+                    if (!_player.BoardUnits.TryGetValue(occupantId, out Unit occupant) || !occupant.CanBeOverriden)
+                        return false;
+                }
             }
 
             return true;
@@ -53,17 +56,23 @@ namespace SimulationEngine.Source.Data.Commands
             if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return;
 
             unit.Position = _pos;
+            Board board = _player.Board;
 
-            foreach (Cell offset in unit.Ocupation.GetOffsets())
+            for (int x = 0; x < unit.Ocupation.Width; x++)
             {
-                Cell cell = _pos + offset;
-                uint overriddenId = _player.Board.Get(cell);
-                _player.Board.Set(cell, _unitId);
-
-                if (_player.BoardUnits.TryGetValue(overriddenId, out Unit overridden))
+                for (int y = 0; y < unit.Ocupation.Height; y++)
                 {
-                    overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
-                    _player.BoardUnits.Remove(overriddenId);
+                    Cell cell = _pos + new Cell { x = x, y = y };
+
+                    uint overriddenId = _player.Board.Get(cell);
+
+                    _player.Board.Set(cell, _unitId);
+
+                    if (_player.BoardUnits.TryGetValue(overriddenId, out Unit overridden))
+                    {
+                        overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
+                        _player.BoardUnits.Remove(overriddenId);
+                    }
                 }
             }
 

@@ -30,6 +30,7 @@ namespace SimulationEngine.Source.Logistic
         }
         public Dictionary<uint, Unit> SpecialUnits { get; private set; }
         public Dictionary<uint, Unit> BoardUnits { get; set; }
+        public Dictionary<string, uint> OfficerIds;
 
         public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
         public int CurrentMoves { get; set; }
@@ -41,6 +42,7 @@ namespace SimulationEngine.Source.Logistic
             Board.Clear();
             SpecialUnits = new();
             BoardUnits = new();
+            OfficerIds = new();
 
 
             PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
@@ -61,6 +63,7 @@ namespace SimulationEngine.Source.Logistic
 
             foreach (string offId in officerIds)
             {
+                
                 KeyValuePair<uint, Unit>? unit = SimulationSystem.SpawnUnit(offId, this);
                 if (unit == null)
                 {
@@ -68,6 +71,7 @@ namespace SimulationEngine.Source.Logistic
                     continue;
                 }
                 SpecialUnits.Add(unit.Value.Key, unit.Value.Value);
+                OfficerIds.Add(offId, unit.Value.Key);
             }
 
             SimulationSystem.SetupBoard(this);

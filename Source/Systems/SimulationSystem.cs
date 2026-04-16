@@ -1,3 +1,4 @@
+using SimulationEngine.Source.Data.Commands;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
@@ -101,144 +102,98 @@ namespace SimulationEngine.Source.Systems
             ApplyEnemyGravity();
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Movement helpers (shared by Move command and ApplyEnemyGravity)
-        // ─────────────────────────────────────────────────────────────────────
+       
 
-        /// <summary>
-        /// Returns all board cells occupied by <paramref name="anchor"/> + <paramref name="shape"/>.
-        /// </summary>
-        private static IEnumerable<Cell> GetBoxCells(Cell anchor, Shape shape)
-        {
-            foreach (Cell offset in shape.GetOffsets())
-                yield return anchor + offset;
-        }
 
-        /// <summary>
-        /// Validates whether <paramref name="unitId"/> can move one step in <paramref name="direction"/>.
-        /// <para>
-        /// <paramref name="allowDisplace"/> = true  → any unit blocking the path is accepted when
-        ///   CanDisplace AND that unit can itself step one cell in the same direction (recursively).
-        ///   This allows a small unit to push a large one and supports push-chains.
-        /// </para>
-        /// <para>
-        /// <paramref name="allowDisplace"/> = false → every target cell must be empty or already
-        ///   owned by the same unit (gravity / enemy-advance mode).
-        /// </para>
-        /// </summary>
-        public static bool CanUnitStep(Board board, Dictionary<uint, Unit> boardUnits,
-            uint unitId, Cell direction, bool allowDisplace)
+        public static bool GattherMoveStack(Board board, Dictionary<uint, Unit> boardUnits, uint unitId, EDirection direction, uint stepCount, 
+            Dictionary<Unit, (EDirection, uint)> moveStack, bool shouldFreeFall = false)
         {
-            if (!boardUnits.TryGetValue(unitId, out Unit unit)) return false;
+
+            Console.WriteLine($"TRIGGER: {unitId}");
+
+            if (!boardUnits.TryGetValue(unitId, out Unit unit))
+            {
+                Console.WriteLine($"eeerrm {unitId}");
+                return false;
+            }
+
+            if (moveStack.ContainsKey(unit))
+            {
+                if (moveStack[unit].Item1 != direction || moveStack[unit].Item2 >= stepCount)
+                {
+                    Console.WriteLine($"SHORT _ Move Stack: {moveStack.Count}");
+                    return true;
+                }
+                moveStack[unit] = (direction,stepCount);
+            }
+            else
+            {
+                moveStack.Add(unit, (direction, stepCount));
+            }
+
+           
 
             Cell anchor = unit.Position;
-            Shape shape = unit.Ocupation;
+            (Cell, Cell, Cell) bounds = unit.Ocupation.GetWall(direction);
+            Cell start = anchor + bounds.Item1;
+            Cell end = anchor + bounds.Item2;
+            Cell step = bounds.Item3;
+            Cell movementVector = direction.ToVector();
 
-            HashSet<uint> displacedUnitIds = new();
-
-            foreach (Cell offset in shape.GetOffsets())
+            for (Cell it = start; it != end+step; it+=step)
             {
-                Cell target = anchor + offset + direction;
-                if (!board.IsInBounds(target)) return false;
 
-                uint occupantId = board.Get(target);
-                if (occupantId == 0 || occupantId == unitId) continue;
+                for(int i=1; i<stepCount+1; i++)
+                {
+                    if (!board.IsInBounds(it + movementVector*i))
+                    {
+                        moveStack.Clear();
+                        Console.WriteLine($"babag {unitId}");
+                        return false;
+                    }
 
-                if (!allowDisplace) return false;
+                    if (!GattherMoveStack(board, boardUnits, board.Get(it + movementVector*i), direction.Opposite(), (uint)(unit.Ocupation.Extend() * movementVector).MagnitudeAbs(), moveStack, shouldFreeFall))
+                    {
+                        moveStack.Clear();
+                        Console.WriteLine($"fortnie {unitId}");
+                        return false;
+                    }
 
-                if (!boardUnits.TryGetValue(occupantId, out Unit occupant) || !occupant.CanDisplace)
-                    return false;
+                }
 
-                displacedUnitIds.Add(occupantId);
             }
-
-            // Each displaced unit must itself be able to step in the same direction.
-            // This check is recursive: a push-chain is valid only if every unit in the
-            // chain has enough room.
-            foreach (uint displacedId in displacedUnitIds)
-            {
-                if (!CanUnitStep(board, boardUnits, displacedId, direction, allowDisplace: true))
-                    return false;
-            }
+            Console.WriteLine($"Move Stack: {moveStack.Count}");
 
             return true;
         }
 
-        /// <summary>
-        /// Executes one movement step for <paramref name="unitId"/> in <paramref name="direction"/>.
-        /// Assumes <see cref="CanUnitStep"/> has already returned true.
-        /// <para>
-        /// Displaced units are moved first (furthest in the direction first so they clear
-        /// space for units behind them), then the moving unit's cells are placed.
-        /// </para>
-        /// Fires <paramref name="movingUnitEvent"/> on the moving unit.
-        /// Displaced units receive <see cref="EUnitEvent.Displace"/> via the recursive call.
-        /// </summary>
-        public static void ApplyUnitStep(Player player, uint unitId, Cell direction, EUnitEvent movingUnitEvent)
+        public static void ApplyMoveStack(Board board, Dictionary<Unit, (EDirection, uint)> moveStack)
         {
-            Board board = player.Board;
-            Dictionary<uint, Unit> boardUnits = player.BoardUnits;
-
-            if (!boardUnits.TryGetValue(unitId, out Unit unit)) return;
-
-            Cell anchor = unit.Position;
-            Shape shape = unit.Ocupation;
-
-            // Collect every distinct unit that sits directly in this unit's path.
-            HashSet<uint> displacedIds = new();
-            foreach (Cell offset in shape.GetOffsets())
+            List<(Unit, Cell, Cell, EDirection, uint)> shapshot = new();
+            foreach(KeyValuePair<Unit, (EDirection, uint)> move in moveStack)
             {
-                Cell target = anchor + offset + direction;
-                uint occupantId = board.Get(target);
-                if (occupantId != 0 && occupantId != unitId)
-                    displacedIds.Add(occupantId);
+
+                shapshot.Add((move.Key, move.Key.Position, move.Key.Ocupation.Extend(), move.Value.Item1, move.Value.Item2));
             }
 
-            // Move displaced units first — furthest in the movement direction goes first
-            // so it clears space for units behind it (handles push-chains).
-            List<uint> ordered = displacedIds
-                .OrderByDescending(id =>
+
+            foreach((Unit, Cell, Cell, EDirection, uint) move in shapshot)
+            {
+                uint unitId = board.Get(move.Item1.Position);
+
+                move.Item1.Position = move.Item2 + move.Item4.ToVector() * (int)move.Item5;
+
+                for (int x = 0; x < move.Item3.x; x++)
                 {
-                    boardUnits.TryGetValue(id, out Unit u);
-                    return GetBoxCells(u.Position, u.Ocupation)
-                        .Max(c => (c * direction).Magnitude());
-                })
-                .ToList();
-
-            foreach (uint displacedId in ordered)
-                ApplyUnitStep(player, displacedId, direction, EUnitEvent.Displace);
-
-            // Now slide this unit one step: every cell moves into the adjacent cell in direction.
-            // Because displaced units have already vacated those cells the target cells are free
-            // (or are this unit's own trailing cells).
-            List<Cell> offsets = shape.GetOffsets()
-                .OrderByDescending(o => (o * direction).Magnitude())
-                .ToList();
-
-            foreach (Cell offset in offsets)
-            {
-                Cell currentCell = anchor + offset;
-                Cell swapCell    = anchor + offset + direction;
-
-                uint current  = board.Get(currentCell);
-                uint swapWith = board.Get(swapCell);
-
-                if (current == swapWith) continue;
-
-                board.Set(currentCell, swapWith);
-                board.Set(swapCell,    current);
-
-                CheckForMatchPositions.Add(currentCell);
-                CheckForMatchPositions.Add(swapCell);
+                    for (int y = 0; y < move.Item3.y; y++)
+                    {
+                        board.Set(move.Item1.Position + new Cell { x = x, y = y }, unitId);
+                    }
+                }
             }
 
-            unit.UnitEventBus.Raise(movingUnitEvent,
-                new ValueChangedPayload<Cell>(anchor + direction, anchor));
+           
         }
-
-        // ─────────────────────────────────────────────────────────────────────
-        // Match detection
-        // ─────────────────────────────────────────────────────────────────────
 
         private static void CheckForMatches()
         {
@@ -388,9 +343,6 @@ namespace SimulationEngine.Source.Systems
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Gravity: board refill — units fall toward y=0 (top of board)
-        // ─────────────────────────────────────────────────────────────────────
 
         private static void RefillBoard()
         {
@@ -402,8 +354,6 @@ namespace SimulationEngine.Source.Systems
 
             foreach (int col in columns)
             {
-                // Collect every falling unit in this column, top-to-bottom (y=0 first).
-                // Clear them from the board as we go so we can repack cleanly.
                 List<(uint id, Cell prevPos, Unit unit)> units = new();
                 for (int y = 0; y < board.Height; y++)
                 {
@@ -416,18 +366,20 @@ namespace SimulationEngine.Source.Systems
                     if (!fallingUnit.CanFall) continue;
 
                     units.Add((id, pos, fallingUnit));
-                    board.Set(pos, 0);
+                    for(int i =0; i<fallingUnit.Ocupation.Height; i++)
+                    { 
+                        board.Set(new Cell {x=pos.x, y = pos.y+i }, 0);
+                    }
                 }
 
-                // Repack from y=0 downward: surviving units pack at the top (y=0 side),
-                // new spawns fill whatever remains at the bottom (high y side).
                 for (int y = 0; y < board.Height; y++)
                 {
                     Cell pos = new Cell { x = col, y = y };
-                    if (board.Get(pos) != 0) continue;   // non-falling unit occupying this cell
+                    if (board.Get(pos) != 0) continue;   
 
                     CheckForMatchPositions.Add(pos);
 
+                    //may be slow to remiove from the start since rearanging the whole array
                     if (units.Count > 0)
                     {
                         (uint id, Cell prevPos, Unit unit) = units[0];
@@ -437,7 +389,6 @@ namespace SimulationEngine.Source.Systems
                         continue;
                     }
 
-                    // No survivors left — spawn a fresh troop at this bottom position
                     KeyValuePair<uint, Unit>? newTroop = SpawnUnit(TroopId, player);
                     if (newTroop == null) continue;
                     player.BoardUnits.Add(newTroop.Value.Key, newTroop.Value.Value);
@@ -447,10 +398,6 @@ namespace SimulationEngine.Source.Systems
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Enemy gravity — enemy special units advance toward y=0 (EDirection.Down)
-        // ─────────────────────────────────────────────────────────────────────
-
         private static void ApplyEnemyGravity()
         {
             Player enemy = ActiveGame.OtherPlayer;
@@ -459,7 +406,7 @@ namespace SimulationEngine.Source.Systems
             List<uint> units = new(HitEnemySpecialUnits);
             HitEnemySpecialUnits.Clear();
 
-            Cell down = Cell.GetMoveDirection(EDirection.Down); // {y: -1} → toward y=0
+            //Cell down = Cell.GetMoveDirection(); 
 
             units.RemoveAll(id => !enemy.BoardUnits.ContainsKey(id));
 
@@ -467,19 +414,18 @@ namespace SimulationEngine.Source.Systems
             units = units.OrderBy(u =>
             {
                 enemy.BoardUnits.TryGetValue(u, out Unit unit);
-                // Find the topmost offset (lowest y) of this unit's shape
-                int minOffsetY = unit.Ocupation.GetOffsets()
-                    .OrderBy(o => o.y)
-                    .First().y;
-                return unit.Position.y + minOffsetY;
+                
+                return unit.Position.y;
             }).ToList();
+
+            Dictionary<Unit, (EDirection, uint)> moveStack = new();
 
             foreach (uint unitId in units)
             {
-                if (!CanUnitStep(board, enemy.BoardUnits, unitId, down, allowDisplace: false))
+                if (!GattherMoveStack(board, enemy.BoardUnits, unitId, EDirection.Down, 1, moveStack, false))
                     continue;
 
-                ApplyUnitStep(enemy, unitId, down, EUnitEvent.Displace);
+                ApplyMoveStack(board, moveStack);
             }
         }
     }

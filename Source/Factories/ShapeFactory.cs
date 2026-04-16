@@ -23,7 +23,7 @@ namespace SimulationEngine.Source.Factories
                 return new Shape();
             }
 
-            Shape s = new Shape(data.Value.width, data.Value.height);
+            Shape s = new Shape((uint)data.Value.width, (uint)data.Value.height);
             _parsedShapes.Add(shapeId, s);
             return s;
         }

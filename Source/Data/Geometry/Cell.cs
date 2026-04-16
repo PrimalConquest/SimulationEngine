@@ -20,6 +20,11 @@ namespace SimulationEngine.Source.Data.Geometry
             return x + y;
         }
 
+        public int MagnitudeAbs()
+        {
+            return Math.Abs(x + y);
+        }
+
         public static Cell operator +(Cell left, Cell right)
         {
             return new Cell { x = left.x + right.x, y = left.y + right.y };
@@ -28,6 +33,20 @@ namespace SimulationEngine.Source.Data.Geometry
         public static Cell operator *(Cell left, Cell right)
         {
             return new Cell { x = left.x * right.x, y = left.y * right.y };
+        }
+
+        public static Cell operator *(Cell left, int scale)
+        {
+            return new Cell { x = left.x * scale, y = left.y * scale };
+        }
+        public static bool operator ==(Cell left, Cell right)
+        {
+            return left.x == right.x && left.y == right.y ;
+        }
+
+        public static bool operator !=(Cell left, Cell right)
+        {
+            return !(left == right);
         }
 
         public static Cell GetMoveDirection(EDirection direction)

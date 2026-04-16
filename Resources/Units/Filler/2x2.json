@@ -1,0 +1,10 @@
+{
+  "Color": "Green",
+  "ShapeId": "Square_2",
+  "StatSheetId": "HealerSheet",
+  "AbilityMap": {
+    "Activate": "HealCommander"
+  },
+  "GlobalAbilityMap": {
+  }
+}

@@ -1,4 +1,5 @@
-﻿using SimulationEngine.Source.Data.Geometry;
+﻿using SimulationEngine.Source.Data.Commands;
+using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using System;
 using System.Collections.Generic;
@@ -58,5 +59,19 @@ namespace SimulationEngine.Source.Logistic
         {
             _tiles[coords.x, coords.y] = index;
         }
+
+        public void Print()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    Console.Write($"{Get(new Cell { x = x, y = y })} ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+
     }
 }
