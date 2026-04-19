@@ -17,7 +17,7 @@ namespace SimulationEngine.Source.Data.Commands
         EDirection _direction;
         int _moveCost;
         int _maxRepetitions;
-        Dictionary<Unit, (EDirection, uint)> moveStack = new();
+        MoveStack? moveStack;
 
 
         public Move(Player player, Cell pos, EDirection direction)
@@ -39,17 +39,29 @@ namespace SimulationEngine.Source.Data.Commands
 
         public bool CanExecute()
         {
-            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+            //if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
             //if (_player.CurrentMoves < _moveCost) return false;
 
             _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
             //if (unit == null) return false;
             //if (!unit.CanMove) return false;
 
+            Dictionary<Unit, Cell> tempPositions = new();
 
-            moveStack = new();
-            return SimulationSystem.GattherMoveStack(
-                _player.Board, _player.BoardUnits, _unitId, _direction, 1, moveStack, true);
+            foreach (KeyValuePair<uint, Unit> _unit in _player.BoardUnits)
+            {
+                tempPositions.Add(_unit.Value, _unit.Value.Position);
+            }
+
+            MoveStack? moveStack = SimulationSystem.GattherMoveStack(_player.Board, _player.BoardUnits, tempPositions, unit, _direction);
+            
+            if(moveStack != null)
+            {
+                Console.WriteLine($"Move stack: \n{moveStack}");
+                return true;
+            }
+            Console.WriteLine("Cannot move");
+            return false;
         }
 
         public void Execute()
@@ -60,7 +72,7 @@ namespace SimulationEngine.Source.Data.Commands
             _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
             //if (unit == null) return;
 
-            SimulationSystem.ApplyMoveStack(_player.Board, moveStack);
+            //SimulationSystem.ApplyMoveStack(_player.Board, moveStack);
 
             _maxRepetitions -= 1;
 

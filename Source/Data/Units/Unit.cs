@@ -28,6 +28,8 @@ namespace SimulationEngine.Source.Data.Units
         public StatSheet Stats { get; private set; }
         public EColor Color { get; private set; }
 
+        public uint Id { get; set { if (field == 0) field = value; } }
+
         Dictionary<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> _abilities;
 
         Dictionary<Ability, KeyValuePair<EGameEvent, EventCallback<EventPayload>>> _globalAbilities;
@@ -95,11 +97,14 @@ namespace SimulationEngine.Source.Data.Units
         public int Y { get { return _position.y; } set { _position.y = value; } }
         public Cell Position { get { return _position; } set { _position = value; } }
 
+        //public (Cell position, Shape occupation) PositionData { get { return (position: Position, occupation: Ocupation); } }
+
         public IEventBus<EUnitEvent, EventPayload> UnitEventBus { get; private set; }
 
         public Unit(Player owningPlayer, EColor color, StatSheet stats, Shape ocupation = default)
         {
             OwningPlayer = owningPlayer;
+            Id = 0;
             Color = color;
             Stats = stats;
             Ocupation = ocupation;

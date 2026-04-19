@@ -66,8 +66,14 @@ namespace SimulationEngine.Source.Logistic
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    Console.Write($"{Get(new Cell { x = x, y = y })} ");
+                    string id = Get(new Cell { x = x, y = y }).ToString();
+                    int numSpacve = 3-id.Length;
+                    Console.Write($"| {id}");
+                    for (int i = 0; i < numSpacve; i++) Console.Write(" ");
+                    Console.Write(" |");
                 }
+                Console.WriteLine();
+                for (int x = 0; x < Width; x++) Console.Write("-------");
                 Console.WriteLine();
             }
         }

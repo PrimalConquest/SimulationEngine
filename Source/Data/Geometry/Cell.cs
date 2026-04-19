@@ -32,9 +32,9 @@ namespace SimulationEngine.Source.Data.Geometry
             return x + y;
         }
 
-        public int MagnitudeAbs()
+        public uint MagnitudeAbs()
         {
-            return Math.Abs(x + y);
+            return (uint)Math.Abs(x + y);
         }
 
         public static Cell operator +(Cell left, Cell right)
@@ -51,6 +51,12 @@ namespace SimulationEngine.Source.Data.Geometry
         {
             return new Cell { x = left.x * scale, y = left.y * scale };
         }
+
+        public static Cell operator *(Cell left, uint scale)
+        {
+            return left * (int)scale;
+        }
+
         public static bool operator ==(Cell left, Cell right)
         {
             return left.x == right.x && left.y == right.y ;
@@ -66,11 +72,11 @@ namespace SimulationEngine.Source.Data.Geometry
 
             switch (direction)
             {
-                case EDirection.Up: return new Cell { x = 0, y = 1 };
-                case EDirection.Down: return new Cell { x = 0, y = -1 };
-                case EDirection.Left: return new Cell { x = -1, y = 0 };
-                case EDirection.Right: return new Cell { x = 1, y = 0 };
-                default: return new Cell { x = 0, y = 0 };
+                case EDirection.Up: return new(0, 1);
+                case EDirection.Down: return new(0, -1);
+                case EDirection.Left: return new(-1, 0);
+                case EDirection.Right: return new(1, 0);
+                default: return new(0, 0);
             }
         }
     }

@@ -4,13 +4,16 @@ using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
+using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories;
 using SimulationEngine.Source.Logistic;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SimulationEngine.Source.Systems
 {
@@ -73,6 +76,7 @@ namespace SimulationEngine.Source.Systems
                 return null;
             }
             uint simId = NextId();
+            unit.Id = simId;
             return new KeyValuePair<uint, Unit>(simId, unit);
         }
 
@@ -102,48 +106,102 @@ namespace SimulationEngine.Source.Systems
             ApplyEnemyGravity();
         }
 
-       
 
-
-        public static bool GattherMoveStack(Board board, Dictionary<uint, Unit> boardUnits, Unit unit, EDirection direction, MoveStack moveStack)
+        public static MoveStack? GattherMoveStack(Board boardCopy, Dictionary<uint, Unit> boardUnits, Dictionary<Unit, Cell> tempPositions, Unit initialUnit, EDirection initialDirection)
         {
-            List<(Unit stepedUnit, Cell position, uint step, EDirection direction)> currentStepGather = new();
-            currentStepGather.Add((unit, unit.Position, 1, direction));
+            MoveStack moveStack = new();
+            
+            if (!boardUnits.ContainsKey(initialUnit.Id) || !initialUnit.CanMove) return null;
 
-            List<(Unit stepedUnit, Cell position, uint step, EDirection direction)> nextStepGather = new();
+            Dictionary<Unit, (uint step, EDirection direction, uint instigator)> currentStepGather = new();
+            currentStepGather.Add(initialUnit, (1, initialDirection, 0));
 
-            while(currentStepGather.Count > 0)
+            Dictionary<Unit, (uint step, EDirection direction, uint instigator)> nextStepGather = new();
+
+            //potentially calculate the tempPositions here instead of recieving themp
+
+            HashSet<List<int>> m = new ();
+            
+
+
+            while (currentStepGather.Count > 0)
             {
                 moveStack.NextTimeStep();
                 foreach (var move in currentStepGather)
                 {
-                    if (!move.stepedUnit.CanMove)
+                    if(!tempPositions.ContainsKey(move.Key)) return null;
+
+                    if (!move.Key.CanMove) return null;
+
+                    int unitMoveCost = move.Key.GetStat(EStat.MoveCost);
+                    if (moveStack.moveCost < unitMoveCost) moveStack.moveCost = (uint)unitMoveCost;
+
+
+                    if (!tempPositions.TryGetValue(move.Key, out Cell anchor)) return null;
+
+                    var bounds = move.Key.Ocupation.GetWall(move.Value.direction);
+                    Cell movementVector = move.Value.direction.ToVector();
+                    Cell start = anchor + bounds.startOffset + movementVector;
+                    Cell end = anchor + bounds.endOffset + movementVector;
+                    Cell step = bounds.step;
+                    uint unitRelativeSize = (move.Key.Ocupation.Extend * movementVector).MagnitudeAbs();
+                    uint actualMoveStep = move.Value.step;
+
+                    uint id = move.Key.Id;
+                    //calculate the actual move position
+                    //gather everything along the path in NextStepGather
+                    for (uint i=0; i<actualMoveStep; i++)
                     {
-                        moveStack.Invalidate();
-                        return false;
+                        for (Cell it = start; it != end + step; it += step)
+                        {
+                            Cell next = (it + movementVector * i);
+                            if (!boardCopy.IsInBounds(next)) return null;
+                            uint currentId = boardCopy.Get(next);
+                            if(currentId == 0 || currentId == id || currentId == move.Value.instigator) continue;
+                            if (!boardUnits.TryGetValue(currentId, out Unit currentUnit)) return null;
+
+                            if (nextStepGather.ContainsKey(currentUnit)) continue;
+                            
+                            nextStepGather.Add(currentUnit, (unitRelativeSize, move.Value.direction.Opposite(), id));
+
+                            uint extend = i + (currentUnit.Ocupation.Extend * movementVector).MagnitudeAbs();
+
+                            if (extend > actualMoveStep) actualMoveStep = extend;
+
+                        }
                     }
 
-                    Cell finalDestination = new(0,0);
+                    // update temp position, clear old position and add to movestack
+                    Cell finalDestination = anchor + movementVector * actualMoveStep;
 
-                    //calculate the actual move position
+                    for (int x=0; x<move.Key.Ocupation.Width; x++)
+                    {
+                        for (int y = 0; y < move.Key.Ocupation.Height; y++)
+                        {
+                            Cell anchorStep = new(anchor.x + x, anchor.y + y);
+                            if (boardCopy.Get(anchorStep) == id) boardCopy.Set(anchorStep, 0);
+                            boardCopy.Set(new(finalDestination.x + x, finalDestination.y + y), id);
+                        }
+                    }
+                    tempPositions[move.Key] = finalDestination;
 
-                    //gather everything along the path in NextStepGather
-
-                    //after apply add to movestack
-                    moveStack.AddMoveInCurrentTimeStep(move.stepedUnit, finalDestination);
+                    moveStack.AddMoveInCurrentTimeStep(move.Key, finalDestination);
 
                 }
 
                 currentStepGather = nextStepGather;
                 nextStepGather = new();
+
+                Console.WriteLine(moveStack);
+                boardCopy.Print();
             }
 
-            return true;
+            return moveStack;
         }
 
-        public static void ApplyMoveStack(Board board, Dictionary<Unit, (EDirection, uint)> moveStack)
+        public static void ApplyMoveStack(Board board, MoveStack moveStack)
         {
-            List<(Unit, Cell, Cell, EDirection, uint)> shapshot = new();
+            /*List<(Unit, Cell, Cell, EDirection, uint)> shapshot = new();
             foreach(KeyValuePair<Unit, (EDirection, uint)> move in moveStack)
             {
 
@@ -164,7 +222,7 @@ namespace SimulationEngine.Source.Systems
                         board.Set(move.Item1.Position + new Cell { x = x, y = y }, unitId);
                     }
                 }
-            }
+            }*/
 
            
         }
@@ -396,10 +454,10 @@ namespace SimulationEngine.Source.Systems
 
             foreach (uint unitId in units)
             {
-                if (!GattherMoveStack(board, enemy.BoardUnits, unitId, EDirection.Down, 1, moveStack, false))
+                /*if (!GattherMoveStack(board, enemy.BoardUnits, unitId, EDirection.Down, 1, moveStack, false))
                     continue;
 
-                ApplyMoveStack(board, moveStack);
+                ApplyMoveStack(board, moveStack);*/
             }
         }
     }

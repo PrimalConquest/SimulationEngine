@@ -28,20 +28,24 @@ namespace SimulationEngine.Source.Data.Geometry
                     yield return new Cell { x = dx, y = dy };
         }
 
-        public Cell Extend()
+        public Cell Extend
         {
-            return new Cell { x = (int)Width, y = (int)Height };
+            get { return new(Width, Height); }
         }
 
-        public (Cell, Cell, Cell) GetWall(EDirection direction)
+        public (Cell startOffset, Cell endOffset, Cell step) GetWall(EDirection direction)
         {
-            switch(direction)
+            switch (direction)
             {
-                case EDirection.Left: return (new Cell { x = 0, y = 0 }, new Cell { x = 0, y = (int)Height-1 }, Cell.GetMoveDirection(EDirection.Up));
-                case EDirection.Right: return (new Cell { x = (int)Width-1, y = 0 }, new Cell { x = (int)Width-1, y = (int)Height-1 }, Cell.GetMoveDirection(EDirection.Up));
-                case EDirection.Up: return (new Cell { x = 0, y = 0 }, new Cell { x = (int)Width-1, y = 0 }, Cell.GetMoveDirection(EDirection.Right));
-                case EDirection.Down: return (new Cell { x = 0, y = (int)Height-1 }, new Cell { x = (int)Width-1, y = (int)Height-1 }, Cell.GetMoveDirection(EDirection.Right));
-                default: return (new Cell { x = 0, y = 0 }, new Cell { x = 0, y = 0 }, Cell.GetMoveDirection(EDirection.Right));
+                case EDirection.Left: return (startOffset: new(0, 0), endOffset: new(0, Height - 1), Cell.GetMoveDirection(EDirection.Up));
+
+                case EDirection.Right: return (startOffset: new(Width - 1, 0), endOffset: new(Width - 1, Height - 1), Cell.GetMoveDirection(EDirection.Up));
+
+                case EDirection.Down: return (startOffset: new(0, 0), endOffset: new(Width - 1, 0), Cell.GetMoveDirection(EDirection.Right));
+
+                case EDirection.Up: return (startOffset: new(0, Height - 1), endOffset: new(Width - 1, Height - 1), Cell.GetMoveDirection(EDirection.Right));
+
+                default: return (startOffset: new(0, 0), endOffset: new(0, 0), Cell.GetMoveDirection(EDirection.Right));
             }
         }
 
