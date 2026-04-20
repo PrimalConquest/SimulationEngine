@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(del \"T:\\\\TU\\\\PrimalConquest\\\\SimulationEngine\\\\Source\\\\Data\\\\Abilities\\\\GrantStat.cs\")"
+      "Bash(del \"T:\\\\TU\\\\PrimalConquest\\\\SimulationEngine\\\\Source\\\\Data\\\\Abilities\\\\GrantStat.cs\")",
+      "Bash(echo.)",
+      "Bash(New-Item -Path \"T:\\\\TU\\\\PrimalConquest\\\\SimulationEngine\\\\Resources\\\\Abilities\\\\GA_GrantMovesSlow.json\" -ItemType File -Force)",
+      "Bash(pwsh -Command \"New-Item -Path 'T:\\\\TU\\\\PrimalConquest\\\\SimulationEngine\\\\Resources\\\\Abilities\\\\GA_GrantMovesSlow.json' -ItemType File -Force\")",
+      "Bash(python3 -c \"open\\(r'T:/TU/PrimalConquest/SimulationEngine/Resources/Abilities/GA_GrantMovesSlow.json', 'w'\\).close\\(\\)\")",
+      "Bash(cmd /c \"type nul > \\\\\"T:\\\\TU\\\\PrimalConquest\\\\SimulationEngine\\\\Resources\\\\Abilities\\\\GA_GrantMovesSlow.json\\\\\"\")"
     ]
   }
 }

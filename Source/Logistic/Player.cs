@@ -19,27 +19,25 @@ namespace SimulationEngine.Source.Logistic
 {
     public class Player
     {
+        static string _commanderStr = "commander";
         public uint Id { get; private set; }
         public Board Board { get; private set; }
 
-        public uint CommanderId { get; private set; }
-        public Unit Commander => SpecialUnits[CommanderId];
+        public Unit Commander => SpecialUnits[_commanderStr] ;
 
-        public Dictionary<uint, Unit> SpecialUnits { get; private set; }
-        public Dictionary<uint, Unit> BoardUnits { get; set; }
-        public Dictionary<string, uint> OfficerIds;
+        public Dictionary<string, Unit> SpecialUnits { get; private set; }
+        public HashSet<Unit> BoardUnits { get; set; }
 
         public IEventBus<EGameEvent, EventPayload> PlayerEventBus { get; private set; }
         public int CurrentMoves { get; set; }
 
         public Player(uint id, string commanderId, HashSet<string> officerIds, Cell boardSize)
-        {
+        {   
             Id = id;
             Board = new Board(boardSize.x, boardSize.y);
             Board.Clear();
             SpecialUnits = new();
             BoardUnits = new();
-            OfficerIds = new();
 
             PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
             foreach (EGameEvent type in Enum.GetValues(typeof(EGameEvent)))
@@ -51,9 +49,7 @@ namespace SimulationEngine.Source.Logistic
                 LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create commander with id '{commanderId}' for player with id '{Id}'");
                 return;
             }
-            CommanderId = commander.Id;
-            SpecialUnits.Add(commander.Id, commander);
-
+            SpecialUnits.Add(_commanderStr, commander);
             foreach (string offId in officerIds)
             {
                 Unit? unit = SimulationSystem.SpawnUnit(offId, this);
@@ -62,8 +58,7 @@ namespace SimulationEngine.Source.Logistic
                     LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create unit with id '{offId}' for player with id '{Id}'");
                     continue;
                 }
-                SpecialUnits.Add(unit.Id, unit);
-                OfficerIds.Add(offId, unit.Id);
+                SpecialUnits.Add(offId, unit);
             }
 
             SimulationSystem.SetupBoard(this);

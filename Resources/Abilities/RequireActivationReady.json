@@ -1,0 +1,6 @@
+{
+  "Class": "RequireActivationReady",
+  "Priority": 10,
+  "TargetingId": "null",
+  "Specific": {}
+}

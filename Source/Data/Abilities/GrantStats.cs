@@ -10,11 +10,11 @@ using System.Collections.Generic;
 
 namespace SimulationEngine.Source.Data.Abilities
 {
-    internal class GrantStat : Ability
+    internal class GrantStats : Ability
     {
         Dictionary<EStat, IValueRef> _stats;
 
-        public GrantStat(Unit owner, int priority = 5, ITargetingScheme? targetingScheme = null) : base(owner, priority, targetingScheme) 
+        public GrantStats(Unit owner, int priority = 5, ITargetingScheme? targetingScheme = null) : base(owner, priority, targetingScheme) 
         {
             _stats = new();
         }
@@ -35,7 +35,7 @@ namespace SimulationEngine.Source.Data.Abilities
 
         public override Ability DeepCopy()
         {
-            GrantStat copy = new(Owner);
+            GrantStats copy = new(Owner);
             copy._stats = new(_stats);
             return copy;
         }

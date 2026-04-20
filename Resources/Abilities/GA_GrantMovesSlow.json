@@ -1,0 +1,14 @@
+{
+  "Class": "GrantAbilities",
+  "Priority": 2,
+  "TargetingId": "TargetSelf",
+  "Specific": {
+    "Abilities": [],
+    "GlobalAbilities": [
+      {
+        "Trigger": "TurnStart",
+        "AbilityId": "GrantMovesSlow"
+      }
+    ]
+  }
+}

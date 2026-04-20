@@ -1,15 +1,18 @@
-﻿using System;
+using SimulationEngine.Source.Helpers.Abilities;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimulationEngine.Source.Helpers.Units
 {
     internal class UnitData
     {
-        public string Color { get; set; } = "";
-        public string ShapeId { get; set; } = "";
+        public string Color       { get; set; } = "";
+        public string ShapeId     { get; set; } = "";
         public string StatSheetId { get; set; } = "";
-        public Dictionary<string, string> AbilityMap { get; set; } = new ();
-        public Dictionary<string, string> GlobalAbilityMap { get; set; } = new();
+
+        /// <summary>List of unit-event ability bindings.</summary>
+        public List<AbilityRefData> AbilityList       { get; set; } = new();
+
+        /// <summary>List of game-event (global) ability bindings.</summary>
+        public List<AbilityRefData> GlobalAbilityList { get; set; } = new();
     }
 }

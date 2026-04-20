@@ -27,8 +27,7 @@ namespace SimulationEngine.Source.Data.Commands
             _direction = (direction);
             if (_movingUnit == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Error,
-                    $"Move - Trying to move pos[x:{pos.x}, y:{pos.y}] unit[{_movingUnit}] that is not on the board");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Move - Trying to move pos[x:{pos.x}, y:{pos.y}] unit[{_movingUnit}] that is not on the board");
                 return;
             }
             //_maxRepetitions = unit.GetStat(EStat.MoveSpeed);

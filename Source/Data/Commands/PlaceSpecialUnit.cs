@@ -12,35 +12,33 @@ namespace SimulationEngine.Source.Data.Commands
     public class PlaceSpecialUnit : IGameCommand
     {
         Player _player;
-        bool _isCommander;
-        uint _unitId;
-        Cell _pos;
+        string _unitId;
+        public Cell Position { get; set; }
 
-        public PlaceSpecialUnit(Player player, uint unitId, Cell pos)
+        public PlaceSpecialUnit(Player player, string unitId, Cell pos)
         {
             _player = player;
-            _isCommander = unitId == player.CommanderId;
             _unitId = unitId;
-            _pos = pos;
+            Position = pos;
         }
 
         public bool CanExecute()
         {
             if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
-            if (_player.BoardUnits.ContainsKey(_unitId)) return false;
-            if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return false;
+
+            if(!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return false;
+
             if (!unit.CanBeDrafted) return false;
 
             Board board = _player.Board;
+            Cell unitExtend = Position + unit.Ocupation.Extend;
+            board.IsInBounds(unitExtend + new Cell(-1, -1));
 
-            for (int x = 0; x < unit.Ocupation.Width; x++)
+            for (int x = Position.x; x < unitExtend.x; x++)
             {
-                for (int y = 0; y < unit.Ocupation.Height; y++)
+                for (int y = Position.y; y < unitExtend.y; y++)
                 {
-                    Cell cell = _pos + new Cell { x = x, y = y };
-                    if (!board.IsInBounds(cell)) return false;
-
-                    Unit? occupant = board.Get(cell);
+                    Unit? occupant = board.Get(new(x,y));
                     if (occupant == null) continue;
                     if (!occupant.CanBeOverriden) return false;
                 }
@@ -52,29 +50,27 @@ namespace SimulationEngine.Source.Data.Commands
         public void Execute()
         {
             if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return;
-
-            unit.Position = _pos;
             Board board = _player.Board;
+            Cell unitExtend = Position + unit.Ocupation.Extend;
 
-            for (int x = 0; x < unit.Ocupation.Width; x++)
+            HashSet<Unit> signaled = new();
+
+            for (int x = Position.x; x < unitExtend.x; x++)
             {
-                for (int y = 0; y < unit.Ocupation.Height; y++)
+                for (int y = Position.y; y < unitExtend.y; y++)
                 {
-                    Cell cell = _pos + new Cell { x = x, y = y };
+                    Unit? overridden = board.Get(new(x, y));
+                    if (overridden == null) continue;
+                    if (signaled.Contains(overridden)) continue;
 
-                    Unit? overridden = board.Get(cell);
-                    board.Set(cell, unit);
-
-                    if (overridden != null)
-                    {
-                        overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
-                        _player.BoardUnits.Remove(overridden.Id);
-                    }
+                    overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
+                    signaled.Add(overridden);
                 }
             }
 
-            _player.BoardUnits.Add(_unitId, unit);
-            unit.UnitEventBus.Raise(EUnitEvent.Draft, new DraftPayload(_pos));
+            board.PlaceUnit(Position, unit);
+
+            unit.UnitEventBus.Raise(EUnitEvent.Draft, new DraftPayload(Position));
 
             SimulationSystem.CheckStateChain();
         }

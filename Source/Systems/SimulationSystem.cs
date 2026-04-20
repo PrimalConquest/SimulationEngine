@@ -377,7 +377,7 @@ namespace SimulationEngine.Source.Systems
                     Cell pos = new Cell { x = i, y = j };
                     Unit? newTroop = SpawnUnit(TroopId, owner);
                     if (newTroop == null) continue;
-                    owner.BoardUnits.Add(newTroop.Id, newTroop);
+                    owner.BoardUnits.Add(newTroop);
                     newTroop.Position = pos;
                     board.Set(pos, newTroop);
                 }
@@ -426,7 +426,7 @@ namespace SimulationEngine.Source.Systems
 
                     Unit? newTroop = SpawnUnit(TroopId, player);
                     if (newTroop == null) continue;
-                    player.BoardUnits.Add(newTroop.Id, newTroop);
+                    player.BoardUnits.Add(newTroop);
                     newTroop.Position = pos;
                     board.Set(pos, newTroop);
                 }
@@ -435,13 +435,13 @@ namespace SimulationEngine.Source.Systems
 
         private static void ApplyEnemyGravity()
         {
-            Player enemy = ActiveGame.OtherPlayer;
+            /*Player enemy = ActiveGame.OtherPlayer;
             Board board = enemy.Board;
 
             List<uint> units = new(HitEnemySpecialUnits);
             HitEnemySpecialUnits.Clear();
 
-            units.RemoveAll(id => !enemy.BoardUnits.ContainsKey(id));
+            units.RemoveAll(id => !enemy.BoardUnits.Contains(id));
 
             // Process units closest to y=0 first so they don't block units behind them.
             units = units.OrderBy(u =>
@@ -452,11 +452,11 @@ namespace SimulationEngine.Source.Systems
 
             foreach (uint unitId in units)
             {
-                /*if (!GattherMoveStack(board, enemy.BoardUnits, unitId, EDirection.Down, 1, moveStack, false))
+                if (!GattherMoveStack(board, enemy.BoardUnits, unitId, EDirection.Down, 1, moveStack, false))
                     continue;
  
-                ApplyMoveStack(board, moveStack);*/
-            }
+                ApplyMoveStack(board, moveStack);
+            }*/
         }
     }
 }

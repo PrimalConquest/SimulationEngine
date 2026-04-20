@@ -10,6 +10,7 @@ namespace SimulationEngine.Source.Enums.Stats
         Damage,
         Energy,
         MaxEnergy,
+        ActivationCost,
         Toll,
         MoveSpeed,
         MoveCost

@@ -1,6 +1,5 @@
 {
   "Class": "GrantStat",
-  "ActivationCost": 50,
   "Priority": 2,
   "TargetingId": "TargetSelf",
   "Specific": {

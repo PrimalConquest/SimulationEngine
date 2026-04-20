@@ -1,10 +1,11 @@
-﻿{
+{
   "Color": "Green",
   "ShapeId": "Line_Horizontal_2",
   "StatSheetId": "HealerSheet",
-  "AbilityMap": {
-    "Activate": "HealCommander"
-  },
-  "GlobalAbilityMap": {
-  }
+  "AbilityList": [
+    { "Trigger": "TryDraft", "AbilityId": "RequireActivationReady" },
+    { "Trigger": "Draft",    "AbilityId": "ActivateOnDraft" },
+    { "Trigger": "Activate", "AbilityId": "HealCommander" }
+  ],
+  "GlobalAbilityList": []
 }

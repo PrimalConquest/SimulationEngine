@@ -1,4 +1,4 @@
-﻿using SimulationEngine.Source.Data.Abilities;
+using SimulationEngine.Source.Data.Abilities;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Data.Units;
@@ -11,9 +11,7 @@ using SimulationEngine.Source.Helpers.Enums;
 using SimulationEngine.Source.Helpers.Units;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimulationEngine.Source.Factories
 {
@@ -24,65 +22,78 @@ namespace SimulationEngine.Source.Factories
         public static Unit? GetUnit(string unitId, Player owner)
         {
             if (_parsedUnits.ContainsKey(unitId))
-            {
                 return _parsedUnits[unitId].DeepCopy(owner);
-            }
 
             UnitData? data = UnitHelper.Parse(unitId);
             if (data == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit cannot parse unit with id '{unitId}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                    $"UnitFactory.GetUnit cannot parse unit with id '{unitId}'");
                 return null;
             }
 
             EColor? color = ColorHelper.ToColor(data.Color);
-            if(color == null)
+            if (color == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse color '{data.Color}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                    $"UnitFactory.GetUnit - Cannot parse color '{data.Color}'");
                 return null;
             }
+
             Shape shape = ShapeFactory.GetShape(data.ShapeId);
+
             StatSheet? sheet = StatSheetFactory.GetSheet(data.StatSheetId);
             if (sheet == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse stat sheet '{data.StatSheetId}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                    $"UnitFactory.GetUnit - Cannot parse stat sheet '{data.StatSheetId}'");
                 return null;
             }
 
             Unit unit = new(owner, color.Value, sheet, shape);
 
-            foreach (KeyValuePair<string, string> pair in data.AbilityMap)
+            // Unit-event abilities
+            foreach (AbilityRefData refData in data.AbilityList)
             {
-                EUnitEvent? unitEvent = UnitEventHelper.ToUnitEvent(pair.Key);
-                if (unitEvent == null)
+                var parsed = AbilityRefHelper.ParseUnitRef(refData);
+                if (parsed == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse unit event '{pair.Key}' for ability '{pair.Value}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                        $"UnitFactory.GetUnit - Cannot parse unit ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
                     continue;
                 }
-                Ability? ability = AbilityFactory.GetAbility(pair.Value, unit);
+
+                Ability? ability = AbilityFactory.GetAbility(parsed.Value.abilityId, unit);
                 if (ability == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse ability '{pair.Value}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                        $"UnitFactory.GetUnit - Cannot load ability '{parsed.Value.abilityId}'");
                     continue;
                 }
-                unit.GrantAbility(unitEvent.Value, ability);
+
+                unit.GrantAbility(parsed.Value.trigger, ability);
             }
 
-            foreach (KeyValuePair<string, string> pair in data.GlobalAbilityMap)
+            // Global (game-event) abilities
+            foreach (AbilityRefData refData in data.GlobalAbilityList)
             {
-                EGameEvent? gameEvent = GameEventHelper.ToGameEvent(pair.Key);
-                if (gameEvent == null)
+                var parsed = AbilityRefHelper.ParseGameRef(refData);
+                if (parsed == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse game event '{pair.Key}' for ability '{pair.Value}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                        $"UnitFactory.GetUnit - Cannot parse global ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
                     continue;
                 }
-                Ability? ability = AbilityFactory.GetAbility(pair.Value, unit);
+
+                Ability? ability = AbilityFactory.GetAbility(parsed.Value.abilityId, unit);
                 if (ability == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse ability '{pair.Value}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
+                        $"UnitFactory.GetUnit - Cannot load global ability '{parsed.Value.abilityId}'");
                     continue;
                 }
-                unit.GrantGlobalAbility(gameEvent.Value, ability);
+
+                unit.GrantGlobalAbility(parsed.Value.trigger, ability);
             }
 
             _parsedUnits.Add(unitId, unit);

@@ -2,11 +2,10 @@
   "Color": "Any",
   "ShapeId": "Tile",
   "StatSheetId": "TroopSheet",
-  "AbilityMap": {
-    "Activate": "GrantEnergyToAllies",
-    "Die": "_GrantEnergy"
-  },
-  "Effectmap": {
-
-  }
+  "AbilityMap": [
+    {
+      "Trigger": "Activate",
+      "AbilityId": "GrantEnergyToAllies"
+    }
+  ]
 }

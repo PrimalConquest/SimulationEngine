@@ -1,6 +1,5 @@
 {
   "Class": "GrantStat",
-  "ActivationCost": 0,
   "Priority": 2,
   "TargetingId": "TargetAllySpecialUnits",
   "Specific": {

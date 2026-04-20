@@ -1,4 +1,4 @@
-﻿using SimulationEngine.Source.Data.Abilities;
+using SimulationEngine.Source.Data.Abilities;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Enums;
@@ -12,9 +12,7 @@ using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Interfaces.Events;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SimulationEngine.Source.Data.Units
 {
@@ -22,26 +20,35 @@ namespace SimulationEngine.Source.Data.Units
     {
         Cell _position;
 
-        public Shape Ocupation { get; private set; }
-        public Player OwningPlayer { get; private set; }
+        public Shape        Ocupation    { get; private set; }
+        public Player       OwningPlayer { get; private set; }
+        public StatSheet    Stats        { get; private set; }
+        public EColor       Color        { get; private set; }
+        public uint         Id           { get; set { if (field == 0) field = value; } }
 
-        public StatSheet Stats { get; private set; }
-        public EColor Color { get; private set; }
+        Dictionary<Ability, KeyValuePair<EUnitEvent,  EventCallback<EventPayload>>> _abilities;
+        Dictionary<Ability, KeyValuePair<EGameEvent,  EventCallback<EventPayload>>> _globalAbilities;
 
-        public uint Id { get; set { if (field == 0) field = value; } }
+        public bool CanActivate
+        {
+            get
+            {
+                EventPayload payload = new();
+                UnitEventBus.Raise(EUnitEvent.TryActivate, payload);
+                return !payload.Cancelled;
+            }
+        }
 
-        Dictionary<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> _abilities;
-
-        Dictionary<Ability, KeyValuePair<EGameEvent, EventCallback<EventPayload>>> _globalAbilities;
-
-        public bool CanActivate { get { return Stats.GetStat(EStat.Energy) >= GetActivationCost(); } }
-        public bool CanMove { get 
+        public bool CanMove
+        {
+            get
             {
                 EventPayload payload = new();
                 UnitEventBus.Raise(EUnitEvent.TryMove, payload);
-                return !payload.Cancelled; 
-            } 
+                return !payload.Cancelled;
+            }
         }
+
         public bool CanFall
         {
             get
@@ -72,7 +79,6 @@ namespace SimulationEngine.Source.Data.Units
             }
         }
 
-
         public bool CanBeDrafted
         {
             get
@@ -93,92 +99,47 @@ namespace SimulationEngine.Source.Data.Units
             }
         }
 
-        public int X { get { return _position.x; } set { _position.x = value; } }
-        public int Y { get { return _position.y; } set { _position.y = value; } }
-        public Cell Position { get { return _position; } set { _position = value; } }
-
-        //public (Cell position, Shape occupation) PositionData { get { return (position: Position, occupation: Ocupation); } }
+        public int  X        { get { return _position.x; } set { _position.x = value; } }
+        public int  Y        { get { return _position.y; } set { _position.y = value; } }
+        public Cell Position { get { return _position;   } set { _position = value;    } }
 
         public IEventBus<EUnitEvent, EventPayload> UnitEventBus { get; private set; }
 
         public Unit(Player owningPlayer, EColor color, StatSheet stats, Shape ocupation = default)
         {
             OwningPlayer = owningPlayer;
-            Id = 0;
-            Color = color;
-            Stats = stats;
-            Ocupation = ocupation;
-            _abilities = new();
+            Id           = 0;
+            Color        = color;
+            Stats        = stats;
+            Ocupation    = ocupation;
+            _abilities       = new();
             _globalAbilities = new();
 
             UnitEventBus = new PriorityEventBus<EUnitEvent, EventPayload>();
-
-            foreach (EUnitEvent type in Enum.GetValues(typeof(EUnitEvent)))
-            {
+            foreach (EUnitEvent type in System.Enum.GetValues(typeof(EUnitEvent)))
                 UnitEventBus.RegisterChannel(type);
-            }
 
             Stats.ListenOnPostStatChange(EStat.Health, new(OnHealthChanged, 2));
             Stats.ListenOnPostStatChange(EStat.Energy, new(OnEnergyChanged, 2));
 
-            UnitEventBus.AddListener(EUnitEvent.TryActivate, new(Activate));
-
-            UnitEventBus.AddListener(EUnitEvent.Move, new(OnMoved));
-            UnitEventBus.AddListener(EUnitEvent.Fall, new(OnMoved));
-            UnitEventBus.AddListener(EUnitEvent.Displace, new(OnMoved));
+            UnitEventBus.AddListener(EUnitEvent.TryActivate, new(CheckActivate, 500));
+            UnitEventBus.AddListener(EUnitEvent.Move,        new(OnMoved));
+            UnitEventBus.AddListener(EUnitEvent.Fall,        new(OnMoved));
+            UnitEventBus.AddListener(EUnitEvent.Displace,    new(OnMoved));
         }
 
-        public void Activate(EventPayload payload)
+        public void CheckActivate(EventPayload payload)
         {
-            payload.Cancelled = !CanActivate;
-            
-            UnitEventBus.Raise(EUnitEvent.Activate, payload);
+            payload.Cancelled = !(Stats.GetStat(EStat.Energy) >= Stats.GetStat(EStat.ActivationCost));
         }
 
-        public int GetActivationCost()
-        {
-            int res = 0;
-            foreach (KeyValuePair<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> ability in _abilities)
-            {
-                if(ability.Value.Key != EUnitEvent.Activate) continue;
-                res += ability.Key.ActivationCost;
-            }
-            return res;
-        }
-
-        private void OnHealthChanged(ValueChangedPayload<int> payload)
-        {
-            if (payload.Value <= 0)
-            {
-                UnitEventBus.Raise(EUnitEvent.Die, new());
-            }
-        }
-        private void OnEnergyChanged(ValueChangedPayload<int> payload)
-        {
-            if (payload.Value <= 0)
-            {
-                Stats.SetStat(EStat.Energy, 0);
-            }
-            int max = Stats.GetStat(EStat.MaxEnergy);
-            if (payload.Value > max) Stats.SetStat(EStat.Energy, max);
-        }
-        private void OnMoved(EventPayload payload)
-        {
-            ValueChangedPayload<Cell>? _payload = payload as ValueChangedPayload<Cell>;
-            if (_payload == null) return;
-            Position = _payload.Value;
-        }
+        public int GetStat(EStat stat) => Stats.GetStat(stat);
 
         public void RecieveDamage(Damage damage)
         {
-            DamageEventPayload payload = new DamageEventPayload(damage);
+            DamageEventPayload payload = new(damage);
             UnitEventBus.Raise(EUnitEvent.RecieveDamage, payload);
             Stats.GrantStat(EStat.Health, -payload.Damage.Value);
-        }
-
-        public int GetStat(EStat stat)
-        {
-            return Stats.GetStat(stat);
         }
 
         public void GrantAbility(EUnitEvent activation, Ability ability)
@@ -197,42 +158,61 @@ namespace SimulationEngine.Source.Data.Units
 
         public void RemoveAbility(Ability ability)
         {
-            _abilities.TryGetValue(ability, out KeyValuePair<EUnitEvent, EventCallback<EventPayload>> hook);
-            if(hook.Value == null)
+            if (!_abilities.TryGetValue(ability, out KeyValuePair<EUnitEvent, EventCallback<EventPayload>> hook))
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveAbility - no ability");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveAbility - ability not found");
                 return;
             }
             UnitEventBus.RemoveListener(hook.Key, hook.Value);
+            _abilities.Remove(ability);
         }
+
         public void RemoveGloablAbility(Ability ability)
         {
-            _globalAbilities.TryGetValue(ability, out KeyValuePair<EGameEvent, EventCallback<EventPayload>> hook);
-            if (hook.Value == null)
+            if (!_globalAbilities.TryGetValue(ability, out KeyValuePair<EGameEvent, EventCallback<EventPayload>> hook))
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveGlobalAbility - no ability");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Unit.RemoveGlobalAbility - ability not found");
                 return;
             }
             OwningPlayer.PlayerEventBus.RemoveListener(hook.Key, hook.Value);
+            _globalAbilities.Remove(ability);
+        }
+
+        private void OnHealthChanged(ValueChangedPayload<int> payload)
+        {
+            if (payload.Value <= 0)
+                UnitEventBus.Raise(EUnitEvent.Die, new());
+        }
+
+        private void OnEnergyChanged(ValueChangedPayload<int> payload)
+        {
+            if (payload.Value < 0)
+                Stats.SetStat(EStat.Energy, 0);
+
+            int max = Stats.GetStat(EStat.MaxEnergy);
+            if (payload.Value > max)
+                Stats.SetStat(EStat.Energy, max);
+        }
+
+        private void OnMoved(EventPayload payload)
+        {
+            ValueChangedPayload<Cell>? _payload = payload as ValueChangedPayload<Cell>;
+            if (_payload == null) return;
+            Position = _payload.Value;
         }
 
         public Unit DeepCopy()
         {
             Unit copy = new(OwningPlayer, Color, Stats.DeepCopy(), Ocupation);
-            
-            foreach (KeyValuePair<Ability, KeyValuePair<EUnitEvent, EventCallback<EventPayload>>> ability in _abilities)
-            {
-                copy.GrantAbility(ability.Value.Key, ability.Key.DeepCopy(copy));
-            }
 
-            foreach (KeyValuePair<Ability, KeyValuePair<EGameEvent, EventCallback<EventPayload>>> ability in _globalAbilities)
-            {
-                copy.GrantGlobalAbility(ability.Value.Key, ability.Key.DeepCopy(copy));
-            }
+            foreach (var kv in _abilities)
+                copy.GrantAbility(kv.Value.Key, kv.Key.DeepCopy(copy));
+
+            foreach (var kv in _globalAbilities)
+                copy.GrantGlobalAbility(kv.Value.Key, kv.Key.DeepCopy(copy));
 
             return copy;
         }
-            
 
         virtual public Unit DeepCopy(Player owningPlayer)
         {

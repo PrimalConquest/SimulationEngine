@@ -1,8 +1,8 @@
 {
-  "Class": "GrantStat",
+  "Class": "RaiseEvent",
   "Priority": 2,
   "TargetingId": "TargetSelf",
   "Specific": {
-    "Toll": { "Type": "Flat", "Value": 17 }
+    "Event": "Activate"
   }
 }

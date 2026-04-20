@@ -1,38 +1,46 @@
-﻿using SimulationEngine.Source.Data.Units;
+using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
+using SimulationEngine.Source.Enums.Logging;
+using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SimulationEngine.Source.Data.Commands
 {
     public class ActivateSpecial : IGameCommand
     {
         Player _player;
-        uint _unitId;
-        public ActivateSpecial(Player player, uint unitId)
+        string _unitId;
+
+        public ActivateSpecial(Player player, string unitId)
         {
             _player = player;
             _unitId = unitId;
         }
+
         public bool CanExecute()
         {
-            if(SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
 
-            if(!_player.BoardUnits.ContainsKey(_unitId)) return false;
-            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
-            if (unit == null) return false;
+            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+
+            if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return false;
+
+            if (!_player.BoardUnits.Contains(unit))
+            {
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Display, $"ActivateSpecial.CanExecute - unit [{_unitId}] is not on the board (not drafted)");
+                return false;
+            }
+
             return unit.CanActivate;
         }
 
         public void Execute()
         {
-            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
-            if (unit == null) return;
-            unit.UnitEventBus.Raise(EUnitEvent.Activate, new());
+            if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return;
+
+            unit.UnitEventBus.Raise(EUnitEvent.Activate, new EventPayload());
 
             SimulationSystem.CheckStateChain();
         }
