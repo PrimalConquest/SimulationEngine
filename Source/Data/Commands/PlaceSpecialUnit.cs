@@ -33,18 +33,16 @@ namespace SimulationEngine.Source.Data.Commands
 
             Board board = _player.Board;
 
-            for(int x = 0; x<unit.Ocupation.Width; x++)
+            for (int x = 0; x < unit.Ocupation.Width; x++)
             {
                 for (int y = 0; y < unit.Ocupation.Height; y++)
                 {
-                    Cell cell = _pos + new Cell { x=x, y=y};
+                    Cell cell = _pos + new Cell { x = x, y = y };
                     if (!board.IsInBounds(cell)) return false;
 
-                    uint occupantId = board.Get(cell);
-                    if (occupantId == 0) continue;
-
-                    if (!_player.BoardUnits.TryGetValue(occupantId, out Unit occupant) || !occupant.CanBeOverriden)
-                        return false;
+                    Unit? occupant = board.Get(cell);
+                    if (occupant == null) continue;
+                    if (!occupant.CanBeOverriden) return false;
                 }
             }
 
@@ -64,14 +62,13 @@ namespace SimulationEngine.Source.Data.Commands
                 {
                     Cell cell = _pos + new Cell { x = x, y = y };
 
-                    uint overriddenId = _player.Board.Get(cell);
+                    Unit? overridden = board.Get(cell);
+                    board.Set(cell, unit);
 
-                    _player.Board.Set(cell, _unitId);
-
-                    if (_player.BoardUnits.TryGetValue(overriddenId, out Unit overridden))
+                    if (overridden != null)
                     {
                         overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
-                        _player.BoardUnits.Remove(overriddenId);
+                        _player.BoardUnits.Remove(overridden.Id);
                     }
                 }
             }

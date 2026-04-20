@@ -23,11 +23,8 @@ namespace SimulationEngine.Source.Logistic
         public Board Board { get; private set; }
 
         public uint CommanderId { get; private set; }
-        public Unit Commander {
-            get {
-                return SpecialUnits[CommanderId];
-            } 
-        }
+        public Unit Commander => SpecialUnits[CommanderId];
+
         public Dictionary<uint, Unit> SpecialUnits { get; private set; }
         public Dictionary<uint, Unit> BoardUnits { get; set; }
         public Dictionary<string, uint> OfficerIds;
@@ -44,34 +41,29 @@ namespace SimulationEngine.Source.Logistic
             BoardUnits = new();
             OfficerIds = new();
 
-
             PlayerEventBus = new PriorityEventBus<EGameEvent, EventPayload>();
-
             foreach (EGameEvent type in Enum.GetValues(typeof(EGameEvent)))
-            {
                 PlayerEventBus.RegisterChannel(type);
-            }
 
-            KeyValuePair<uint, Unit>? commander = SimulationSystem.SpawnUnit(commanderId, this);
+            Unit? commander = SimulationSystem.SpawnUnit(commanderId, this);
             if (commander == null)
             {
                 LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create commander with id '{commanderId}' for player with id '{Id}'");
                 return;
             }
-            CommanderId = commander.Value.Key;
-            SpecialUnits.Add(commander.Value.Key, commander.Value.Value);
+            CommanderId = commander.Id;
+            SpecialUnits.Add(commander.Id, commander);
 
             foreach (string offId in officerIds)
             {
-                
-                KeyValuePair<uint, Unit>? unit = SimulationSystem.SpawnUnit(offId, this);
+                Unit? unit = SimulationSystem.SpawnUnit(offId, this);
                 if (unit == null)
                 {
                     LogSystem.Log(ELogCategory.Debug, ELogLevel.Error, $"Cannot create unit with id '{offId}' for player with id '{Id}'");
                     continue;
                 }
-                SpecialUnits.Add(unit.Value.Key, unit.Value.Value);
-                OfficerIds.Add(offId, unit.Value.Key);
+                SpecialUnits.Add(unit.Id, unit);
+                OfficerIds.Add(offId, unit.Id);
             }
 
             SimulationSystem.SetupBoard(this);
@@ -90,6 +82,5 @@ namespace SimulationEngine.Source.Logistic
             PlayerEventBus.Raise(EGameEvent.TurnEnd, _payload);
             CurrentMoves = _payload.Value;
         }
-
     }
 }

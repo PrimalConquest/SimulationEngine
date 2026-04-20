@@ -79,5 +79,15 @@ namespace SimulationEngine.Source.Data.Geometry
                 default: return new(0, 0);
             }
         }
+
+        public static bool IsCellInBounds(Cell check, Cell boundUpperLeft, Cell boundLowerRight)
+        {
+            return check.x > boundUpperLeft.x && check.x < boundLowerRight.x && check.y > boundUpperLeft.y && check.y < boundLowerRight.y;
+        }
+
+        public static bool IsCellInBoundsInclusive(Cell check, Cell boundUpperLeft, Cell boundLowerRight)
+        {
+            return check.x >= boundUpperLeft.x && check.x <= boundLowerRight.x && check.y >= boundUpperLeft.y && check.y <= boundLowerRight.y;
+        }
     }
 }

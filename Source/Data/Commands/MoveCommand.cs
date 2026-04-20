@@ -10,31 +10,30 @@ using SimulationEngine.Source.Systems;
 
 namespace SimulationEngine.Source.Data.Commands
 {
-    public class Move : IGameCommand
+    public class MoveCommand : IGameCommand
     {
         Player _player;
-        uint _unitId;
+        Unit? _movingUnit;
         EDirection _direction;
         int _moveCost;
         int _maxRepetitions;
         MoveStack? moveStack;
 
 
-        public Move(Player player, Cell pos, EDirection direction)
+        public MoveCommand(Player player, Cell pos, EDirection direction)
         {
             _player = player;
-            _unitId = _player.Board.Get(pos);
+            _movingUnit = _player.Board.Get(pos);
             _direction = (direction);
-            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
-            if (unit == null)
+            if (_movingUnit == null)
             {
                 LogSystem.Log(ELogCategory.Debug, ELogLevel.Error,
-                    $"Move - Trying to move pos[x:{pos.x}, y:{pos.y}] unit[{_unitId}] that is not on the board");
+                    $"Move - Trying to move pos[x:{pos.x}, y:{pos.y}] unit[{_movingUnit}] that is not on the board");
                 return;
             }
-            _maxRepetitions = unit.GetStat(EStat.MoveSpeed);
+            //_maxRepetitions = unit.GetStat(EStat.MoveSpeed);
             _maxRepetitions = 1;//////////
-            _moveCost = unit.GetStat(EStat.MoveCost);
+            //_moveCost = unit.GetStat(EStat.MoveCost);
         }
 
         public bool CanExecute()
@@ -42,8 +41,8 @@ namespace SimulationEngine.Source.Data.Commands
             //if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
             //if (_player.CurrentMoves < _moveCost) return false;
 
-            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
-            //if (unit == null) return false;
+            //_player.BoardUnits.TryGetValue(_movingUnit, out Unit unit);
+            if (_movingUnit == null) return false;
             //if (!unit.CanMove) return false;
 
             Dictionary<Unit, Cell> tempPositions = new();
@@ -53,7 +52,7 @@ namespace SimulationEngine.Source.Data.Commands
                 tempPositions.Add(_unit.Value, _unit.Value.Position);
             }
 
-            MoveStack? moveStack = SimulationSystem.GattherMoveStack(_player.Board, _player.BoardUnits, tempPositions, unit, _direction);
+            MoveStack? moveStack = SimulationSystem.GattherMoveStack(_player.Board, _movingUnit, _direction);
             
             if(moveStack != null)
             {
@@ -66,10 +65,14 @@ namespace SimulationEngine.Source.Data.Commands
 
         public void Execute()
         {
+
+
+            var boardSnapshot = _player.Board.SnapshotPositions();
+
             //_player.CurrentMoves -= _moveCost;
             _moveCost = 0;
 
-            _player.BoardUnits.TryGetValue(_unitId, out Unit unit);
+            //_player.BoardUnits.TryGetValue(_movingUnit, out Unit unit);
             //if (unit == null) return;
 
             //SimulationSystem.ApplyMoveStack(_player.Board, moveStack);

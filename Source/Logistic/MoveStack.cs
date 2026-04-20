@@ -8,7 +8,7 @@ namespace SimulationEngine.Source.Logistic
 {
     internal class MoveStack
     {
-        public List<List<(Unit unit, Cell destination)>> moves;
+        public List<List<(Unit unit, Cell start, Cell destination)>> moves;
         public uint moveCost;
 
         public MoveStack()
@@ -23,7 +23,7 @@ namespace SimulationEngine.Source.Logistic
             moveCost = 0;
         }
 
-        public void AddTimeStep(List<(Unit unit, Cell destination)> gatherList)
+        public void AddTimeStep(List<(Unit unit, Cell start, Cell destination)> gatherList)
         {
             moves.Add(gatherList);
         }
@@ -33,9 +33,9 @@ namespace SimulationEngine.Source.Logistic
             moves.Add(new());
         }
 
-        public void AddMoveInCurrentTimeStep(Unit unit, Cell destination)
+        public void AddMoveInCurrentTimeStep(Unit unit, Cell start, Cell destination)
         {
-            moves.Last().Add((unit, destination));
+            moves.Last().Add((unit,start, destination));
         }
 
         public override string ToString()
@@ -52,9 +52,9 @@ namespace SimulationEngine.Source.Logistic
                 }
                 else
                 {
-                    foreach (var (unit, destination) in moves[i])
+                    foreach (var (unit,start, destination) in moves[i])
                     {
-                        sb.AppendLine($"    [{unit}]{unit.Position} -> {destination}");
+                        sb.AppendLine($"    [{unit.Id} ({unit.Position})] {start} -> {destination}");
                     }
                 }
             }
