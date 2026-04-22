@@ -13,6 +13,11 @@ namespace BattleServer.Source.Hubs
             return base.OnConnectedAsync();
         }
 
+        public void ConnetToGame()
+        {
+            //SimulationSystem.ActiveGame.RegisterPlayer(...);
+        }
+
         public bool SendCommand(ICommandInfo info)
         {
 
@@ -21,9 +26,6 @@ namespace BattleServer.Source.Hubs
             return true;
         }
 
-        public void ConnetToGame()
-        {
-            //SimulationSystem.ActiveGame.RegisterPlayer(...);
-        }
+
     }
 }

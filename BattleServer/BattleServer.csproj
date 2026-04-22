@@ -17,8 +17,13 @@
     <ProjectReference Include="..\SharedServices\SharedServices.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Source\Controllers\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Source\Controllers\" />
+    </ItemGroup>
+
+    <Target Name="DockerBuildAndPush" AfterTargets="Build" Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">
+	    <Exec Command="docker build -f BattleServer/Dockerfile -t ad04a/primal-conquest-battle-server:latest ." WorkingDirectory="$(MSBuildProjectDirectory)\.."/>
+	    <Exec Command="docker push ad04a/primal-conquest-battle-server:latest" WorkingDirectory="$(MSBuildProjectDirectory)\.."/>
+    </Target>
 
 </Project>

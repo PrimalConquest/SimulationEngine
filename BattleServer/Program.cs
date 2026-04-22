@@ -11,7 +11,7 @@ namespace BattleServer
 
             builder.Services.AddSignalR();
 
-            Game game = new();
+            Game game = new(2, new(7,7));
             game.InitGame();
             // Add services to the container.
 
