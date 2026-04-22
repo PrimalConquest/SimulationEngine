@@ -4,6 +4,7 @@ using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
+using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
@@ -19,8 +20,8 @@ namespace SimulationEngine.Source.Data.Commands
         int _maxRepetitions;
         MoveStack? moveStack;
 
-
-        public MoveCommand(Player player, Cell pos, EDirection direction)
+        public MoveCommand(Player player, MoveCommandInfo info ) : this(player, info.Position, info.Direction) { }
+        protected MoveCommand(Player player, Cell pos, EDirection direction)
         {
             _player = player;
             _movingUnit = _player.Board.Get(pos);

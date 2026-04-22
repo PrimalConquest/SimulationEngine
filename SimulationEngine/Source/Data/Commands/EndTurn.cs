@@ -1,4 +1,5 @@
-﻿using SimulationEngine.Source.Interfaces;
+﻿using SimulationEngine.Source.Factories.Commands.CommandInfos;
+using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
 using System;
@@ -12,7 +13,8 @@ namespace SimulationEngine.Source.Data.Commands
     {
         Player _player;
 
-        public EndTurn(Player playerEnding)
+        public EndTurn(Player player, EndTurnCommandInfo info) : this(player) { }
+        protected EndTurn(Player playerEnding)
         {
             _player = playerEnding;
         }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Logistic
 {
-    internal class MoveStack
+    public class MoveStack
     {
         public List<List<(Unit unit, Cell start, Cell destination)>> moves;
         public uint moveCost;

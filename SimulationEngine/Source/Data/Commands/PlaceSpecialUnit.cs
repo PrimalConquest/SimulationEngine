@@ -3,6 +3,7 @@ using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Events.Payloads;
+using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
@@ -15,7 +16,9 @@ namespace SimulationEngine.Source.Data.Commands
         string _unitId;
         public Cell Position { get; set; }
 
-        public PlaceSpecialUnit(Player player, string unitId, Cell pos)
+        public PlaceSpecialUnit(Player player, PlaceSpecialCommandInfo info) : this(player, info.UnitId, info.Position) { }
+
+        protected PlaceSpecialUnit(Player player, string unitId, Cell pos)
         {
             _player = player;
             _unitId = unitId;

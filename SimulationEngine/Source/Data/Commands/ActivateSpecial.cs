@@ -2,6 +2,7 @@ using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
 using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Events.Payloads;
+using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
@@ -13,7 +14,9 @@ namespace SimulationEngine.Source.Data.Commands
         Player _player;
         string _unitId;
 
-        public ActivateSpecial(Player player, string unitId)
+        public ActivateSpecial(Player player, ActivateSpecialCommandInfo info) : this(player, info.UnitId) { }
+
+        protected ActivateSpecial(Player player, string unitId)
         {
             _player = player;
             _unitId = unitId;

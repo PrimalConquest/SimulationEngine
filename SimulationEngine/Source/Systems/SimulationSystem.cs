@@ -18,7 +18,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SimulationEngine.Source.Systems
 {
-    internal static class SimulationSystem
+    public static class SimulationSystem
     {
        
 

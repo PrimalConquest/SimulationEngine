@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -15,6 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharedServices\SharedServices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Source\Controllers\" />
   </ItemGroup>
 
 </Project>

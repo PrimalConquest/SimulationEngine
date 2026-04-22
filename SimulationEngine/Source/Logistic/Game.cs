@@ -74,10 +74,12 @@ namespace SimulationEngine.Source.Logistic
             StartTurn();
         }
 
+        public bool CanStart => Players.Count == _numPlayers;
+
         public void Play()
         {
 
-            if(Players.Count != _numPlayers)
+            if(!CanStart)
             {
                 LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"Cannot start game - {Players.Count}/{_numPlayers} players");
                 return;
