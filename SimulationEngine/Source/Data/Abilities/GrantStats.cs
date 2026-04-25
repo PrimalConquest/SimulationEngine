@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
+using SharedUtils.Source.Events;
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Units;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Helpers;

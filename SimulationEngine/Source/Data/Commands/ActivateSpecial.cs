@@ -1,6 +1,6 @@
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Interfaces;
@@ -43,7 +43,7 @@ namespace SimulationEngine.Source.Data.Commands
         {
             if (!_player.SpecialUnits.TryGetValue(_unitId, out Unit unit)) return;
 
-            unit.UnitEventBus.Raise(EUnitEvent.Activate, new EventPayload());
+            unit.UnitEventBus.Raise(EUnitEvent.Activate, new());
 
             SimulationSystem.CheckStateChain();
         }

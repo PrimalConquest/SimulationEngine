@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SimulationEngine.Source.Enums.Logging;
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Helpers;
 using System;
 using System.Collections.Generic;

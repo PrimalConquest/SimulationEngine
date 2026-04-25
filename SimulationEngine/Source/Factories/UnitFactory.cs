@@ -1,10 +1,10 @@
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Abilities;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Helpers;
 using SimulationEngine.Source.Helpers.Abilities;
 using SimulationEngine.Source.Helpers.Enums;
@@ -27,16 +27,14 @@ namespace SimulationEngine.Source.Factories
             UnitData? data = UnitHelper.Parse(unitId);
             if (data == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                    $"UnitFactory.GetUnit cannot parse unit with id '{unitId}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit cannot parse unit with id '{unitId}'");
                 return null;
             }
 
             EColor? color = ColorHelper.ToColor(data.Color);
             if (color == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                    $"UnitFactory.GetUnit - Cannot parse color '{data.Color}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse color '{data.Color}'");
                 return null;
             }
 
@@ -45,8 +43,7 @@ namespace SimulationEngine.Source.Factories
             StatSheet? sheet = StatSheetFactory.GetSheet(data.StatSheetId);
             if (sheet == null)
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                    $"UnitFactory.GetUnit - Cannot parse stat sheet '{data.StatSheetId}'");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse stat sheet '{data.StatSheetId}'");
                 return null;
             }
 
@@ -58,16 +55,14 @@ namespace SimulationEngine.Source.Factories
                 var parsed = AbilityRefHelper.ParseUnitRef(refData);
                 if (parsed == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                        $"UnitFactory.GetUnit - Cannot parse unit ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse unit ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
                     continue;
                 }
 
                 Ability? ability = AbilityFactory.GetAbility(parsed.Value.abilityId, unit);
                 if (ability == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                        $"UnitFactory.GetUnit - Cannot load ability '{parsed.Value.abilityId}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot load ability '{parsed.Value.abilityId}'");
                     continue;
                 }
 
@@ -80,16 +75,14 @@ namespace SimulationEngine.Source.Factories
                 var parsed = AbilityRefHelper.ParseGameRef(refData);
                 if (parsed == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                        $"UnitFactory.GetUnit - Cannot parse global ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot parse global ability ref (Trigger='{refData.Trigger}', AbilityId='{refData.AbilityId}')");
                     continue;
                 }
 
                 Ability? ability = AbilityFactory.GetAbility(parsed.Value.abilityId, unit);
                 if (ability == null)
                 {
-                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                        $"UnitFactory.GetUnit - Cannot load global ability '{parsed.Value.abilityId}'");
+                    LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"UnitFactory.GetUnit - Cannot load global ability '{parsed.Value.abilityId}'");
                     continue;
                 }
 

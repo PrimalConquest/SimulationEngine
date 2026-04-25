@@ -1,10 +1,8 @@
-﻿using SimulationEngine.Source.Events;
-using SimulationEngine.Source.Events.Payloads;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Interfaces.Events
+namespace SharedUtils.Source.Events
 {
     public interface IEventBus<T, P>
     {

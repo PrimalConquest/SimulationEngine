@@ -1,10 +1,10 @@
-﻿using SimulationEngine.Source.Events.Payloads;
-using SimulationEngine.Source.Interfaces;
+﻿using SharedUtils.Source.Events.Payloads;
+using SharedUtils.Source.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Loggers
+namespace SharedUtils.Source.Logging.Loggers
 {
     internal class ConsoleLogger : ILogger
     {

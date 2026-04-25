@@ -1,10 +1,10 @@
 using Newtonsoft.Json.Linq;
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Commands;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories;
@@ -351,7 +351,7 @@ namespace SimulationEngine.Source.Systems
                     Unit? unit = board.Get(cell);
                     if (unit == null || activated.Contains(unit)) continue;
 
-                    unit.UnitEventBus.Raise(EUnitEvent.TryActivate, new EventPayload());
+                    unit.UnitEventBus.Raise(EUnitEvent.TryActivate, new());
                     activated.Add(unit);
                 }
 
@@ -361,7 +361,7 @@ namespace SimulationEngine.Source.Systems
                 if (group.Value.Count > 2)
                     originUnit.UnitEventBus.Raise(EUnitEvent.Promote, new ValuePayload<int>(group.Value.Count - 3));
                 else
-                    originUnit.UnitEventBus.Raise(EUnitEvent.Activate, new EventPayload());
+                    originUnit.UnitEventBus.Raise(EUnitEvent.Activate, new());
 
                 activated.Add(originUnit);
             }

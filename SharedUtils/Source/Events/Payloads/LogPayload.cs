@@ -1,9 +1,9 @@
-﻿using SimulationEngine.Source.Enums.Logging;
+﻿using SharedUtils.Source.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Events.Payloads
+namespace SharedUtils.Source.Events.Payloads
 {
     public class LogPayload : EventPayload
     {

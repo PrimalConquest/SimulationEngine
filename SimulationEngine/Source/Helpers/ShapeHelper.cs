@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using SimulationEngine.Source.Enums.Logging;
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Systems;
 using System.Collections.Generic;
 
@@ -9,9 +9,6 @@ namespace SimulationEngine.Source.Helpers
     {
         static string _resource = "Shapes.json";
 
-        /// <summary>
-        /// Returns (width, height) for the given shape id, or null if not found.
-        /// </summary>
         public static (int width, int height)? Parse(string id)
         {
             string? json = ResourceSystem.Get(_resource);

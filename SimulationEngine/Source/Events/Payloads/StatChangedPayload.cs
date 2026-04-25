@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SimulationEngine.Source.Events.Payloads
 {
-    internal class StatChangedPayload : StatPayload
+    internal class StatChangedPayload : _StatPayload
     {
         public int OldValue { get; set; }
         public StatChangedPayload(EValueType type, int newValue, int oldValue) : base(type, newValue)

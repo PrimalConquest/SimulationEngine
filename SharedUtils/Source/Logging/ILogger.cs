@@ -1,9 +1,9 @@
-﻿using SimulationEngine.Source.Events.Payloads;
+﻿using SharedUtils.Source.Events.Payloads;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Interfaces
+namespace SharedUtils.Source.Logging
 {
     public interface ILogger
     {

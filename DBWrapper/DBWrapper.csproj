@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedServices\SharedUtils.csproj" />
+    <ProjectReference Include="..\SharedUtils\SharedUtils.csproj" />
   </ItemGroup>
 
 	<Target Name="DockerBuildAndPush" AfterTargets="Build" Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">

@@ -1,7 +1,6 @@
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Interfaces;
@@ -66,7 +65,7 @@ namespace SimulationEngine.Source.Data.Commands
                     if (overridden == null) continue;
                     if (signaled.Contains(overridden)) continue;
 
-                    overridden.UnitEventBus.Raise(EUnitEvent.Override, new EventPayload());
+                    overridden.UnitEventBus.Raise(EUnitEvent.Override, new());
                     signaled.Add(overridden);
                 }
             }

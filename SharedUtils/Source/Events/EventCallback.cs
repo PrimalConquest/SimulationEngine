@@ -1,9 +1,8 @@
-﻿using SimulationEngine.Source.Events.Payloads;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Events
+namespace SharedUtils.Source.Events
 {
     public class EventCallback<P>
     {
@@ -18,6 +17,6 @@ namespace SimulationEngine.Source.Events
             IsOneShot = isOneShot;
         }
 
-        public static implicit operator EventCallback<P>( Action<P> handle) => new(handle);
+        public static implicit operator EventCallback<P>(Action<P> handle) => new(handle);
     }
 }

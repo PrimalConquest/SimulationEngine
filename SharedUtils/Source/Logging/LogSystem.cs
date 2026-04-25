@@ -1,17 +1,12 @@
-﻿using SimulationEngine.Source.Enums.Logging;
-using SimulationEngine.Source.Enums.Stats;
-using SimulationEngine.Source.Events;
-using SimulationEngine.Source.Events.Busses;
-using SimulationEngine.Source.Events.Payloads;
-using SimulationEngine.Source.Interfaces;
-using SimulationEngine.Source.Interfaces.Events;
-using SimulationEngine.Source.Loggers;
+﻿using SharedUtils.Source.Events;
+using SharedUtils.Source.Events.Busses;
+using SharedUtils.Source.Events.Payloads;
+using SharedUtils.Source.Logging.Loggers;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Xml.Linq;
 
-namespace SimulationEngine.Source.Systems
+namespace SharedUtils.Source.Logging
 {
     public static class LogSystem
     {
@@ -35,7 +30,7 @@ namespace SimulationEngine.Source.Systems
             foreach (ELogCategory category in Enum.GetValues(typeof(ELogCategory)))
             {
                 EventCallback<LogPayload> callback = new(Logger.Log);
-                _onLog.AddListener(category,callback);
+                _onLog.AddListener(category, callback);
             }
         }
 

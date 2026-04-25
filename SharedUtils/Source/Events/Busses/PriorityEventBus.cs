@@ -1,16 +1,11 @@
-﻿using SimulationEngine.Source.Enums.Logging;
-using SimulationEngine.Source.Events;
-using SimulationEngine.Source.Events.Payloads;
-using SimulationEngine.Source.Interfaces.Events;
-using SimulationEngine.Source.Systems;
+﻿using SharedUtils.Source.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Text;
 
-namespace SimulationEngine.Source.Events.Busses
+namespace SharedUtils.Source.Events.Busses
 {
-    internal class PriorityEventBus<T, P> : IEventBus<T, P> where P : EventPayload 
+    public class PriorityEventBus<T, P> : IEventBus<T, P> where P : EventPayload
     {
         private readonly Dictionary<T, List<EventCallback<P>>> _channels = new();
 
@@ -59,7 +54,7 @@ namespace SimulationEngine.Source.Events.Busses
             }
 
             int i = 0;
-            for (; i < list.Count && list[i].Priority < callback.Priority; i++);
+            for (; i < list.Count && list[i].Priority < callback.Priority; i++) ;
             list.Insert(i, callback);
 
             return true;

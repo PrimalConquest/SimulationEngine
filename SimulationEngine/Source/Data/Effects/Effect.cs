@@ -1,5 +1,5 @@
-﻿using SimulationEngine.Source.Data.Stats;
-using SimulationEngine.Source.Enums.Logging;
+﻿using SharedUtils.Source.Logging;
+using SimulationEngine.Source.Data.Stats;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Systems;
 using System;

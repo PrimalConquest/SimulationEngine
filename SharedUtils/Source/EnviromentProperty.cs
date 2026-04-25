@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharedUtils
+namespace SharedUtils.Source
 {
     public class EnviromentProperty
     {

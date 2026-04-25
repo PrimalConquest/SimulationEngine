@@ -1,6 +1,6 @@
-﻿using SimulationEngine.Source.Data.Geometry;
+﻿using SharedUtils.Source.Logging;
+using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Data.Stats;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Helpers;
 using SimulationEngine.Source.Systems;

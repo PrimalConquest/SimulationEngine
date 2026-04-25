@@ -1,6 +1,6 @@
 using DBWrapper.Source.Context;
 using Microsoft.EntityFrameworkCore;
-using SharedUtils;
+using SharedUtils.Source;
 
 namespace DBWrapper
 {

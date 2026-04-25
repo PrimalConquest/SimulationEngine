@@ -7,6 +7,6 @@
   <Project Path="BattleServer/BattleServer.csproj" Id="40449de6-c2c2-4261-ad28-66f549dc24b9" />
   <Project Path="DBWrapper/DBWrapper.csproj" Id="27d75fb2-5352-4ea0-b146-cbe904d113cf" />
   <Project Path="Matchmaking/Matchmaking.csproj" Id="60fa0866-ee7c-458b-a752-3cc9e9b8c0b0" />
-  <Project Path="SharedServices/SharedUtils.csproj" Id="33608e30-93be-4901-aed8-ac10bd9f2fe9" />
+  <Project Path="SharedUtils/SharedUtils.csproj" />
   <Project Path="SimulationEngine/SimulationEngine.csproj" />
 </Solution>

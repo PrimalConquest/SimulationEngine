@@ -1,7 +1,8 @@
 using Newtonsoft.Json.Linq;
+using SharedUtils.Source.Events;
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Units;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Events.Payloads;
 using SimulationEngine.Source.Factories;
 using SimulationEngine.Source.Helpers.Abilities;
@@ -33,8 +34,7 @@ namespace SimulationEngine.Source.Data.Abilities
                     Ability? ability = AbilityFactory.GetAbility(abilityId, target);
                     if (ability == null)
                     {
-                        LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                            $"GrantAbility.Activate - Could not load ability '{abilityId}' for target [{target.Id}]");
+                        LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"GrantAbility.Activate - Could not load ability '{abilityId}' for target [{target.Id}]");
                         continue;
                     }
                     target.GrantAbility(trigger, ability);
@@ -45,8 +45,7 @@ namespace SimulationEngine.Source.Data.Abilities
                     Ability? ability = AbilityFactory.GetAbility(abilityId, target);
                     if (ability == null)
                     {
-                        LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                            $"GrantAbility.Activate - Could not load global ability '{abilityId}' for target [{target.Id}]");
+                        LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"GrantAbility.Activate - Could not load global ability '{abilityId}' for target [{target.Id}]");
                         continue;
                     }
                     target.GrantGlobalAbility(trigger, ability);
@@ -79,8 +78,7 @@ namespace SimulationEngine.Source.Data.Abilities
             }
             else
             {
-                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning,
-                    $"GrantAbility.Extract - '{AbilitiesKey}' array missing or invalid, no unit abilities will be granted");
+                LogSystem.Log(ELogCategory.Debug, ELogLevel.Warning, $"GrantAbility.Extract - '{AbilitiesKey}' array missing or invalid, no unit abilities will be granted");
             }
 
             // Global (game-event) abilities

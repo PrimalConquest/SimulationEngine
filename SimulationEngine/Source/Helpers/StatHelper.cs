@@ -1,4 +1,4 @@
-﻿using SimulationEngine.Source.Enums.Logging;
+﻿using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Enums.Stats;
 using SimulationEngine.Source.Systems;
 using System;

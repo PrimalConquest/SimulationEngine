@@ -1,6 +1,6 @@
-﻿using SimulationEngine.Source.Enums;
+﻿using SharedUtils.Source.Logging;
+using SimulationEngine.Source.Enums;
 using SimulationEngine.Source.Enums.EventTypes;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Systems;
 using System;
 using System.Collections.Generic;

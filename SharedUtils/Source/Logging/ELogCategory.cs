@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimulationEngine.Source.Enums.Logging
+namespace SharedUtils.Source.Logging
 {
     public enum ELogCategory
     {

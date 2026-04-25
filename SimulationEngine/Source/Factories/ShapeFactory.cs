@@ -1,5 +1,5 @@
+using SharedUtils.Source.Logging;
 using SimulationEngine.Source.Data.Geometry;
-using SimulationEngine.Source.Enums.Logging;
 using SimulationEngine.Source.Helpers;
 using SimulationEngine.Source.Systems;
 using System.Collections.Generic;

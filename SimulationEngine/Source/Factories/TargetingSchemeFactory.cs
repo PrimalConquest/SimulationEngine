@@ -1,5 +1,5 @@
-﻿using SimulationEngine.Source.Data.Abilities;
-using SimulationEngine.Source.Enums.Logging;
+﻿using SharedUtils.Source.Logging;
+using SimulationEngine.Source.Data.Abilities;
 using SimulationEngine.Source.Helpers.Abilities;
 using SimulationEngine.Source.Helpers.TargetingScheme;
 using SimulationEngine.Source.Interfaces;
