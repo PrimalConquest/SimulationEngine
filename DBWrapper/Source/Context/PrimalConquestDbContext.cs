@@ -8,8 +8,8 @@ namespace DBWrapper.Source.Context
     {
         public PrimalConquestDbContext(DbContextOptions<PrimalConquestDbContext> options) : base(options) { }
 
-        DbSet<User> Users { get; set; }
-        DbSet<UserInfo> UsersInfo { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserInfo> UserInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
