@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharedServices
+namespace SharedServices.Source.Interfaces
 {
     public interface ISimulationClient
     {

@@ -1,3 +1,6 @@
+using DBWrapper.Source.Context;
+using Microsoft.EntityFrameworkCore;
+using SharedServices.Source.Utils;
 
 namespace DBWrapper
 {
@@ -5,20 +8,24 @@ namespace DBWrapper
     {
         public static void Main(string[] args)
         {
+            string host = EnviromentProperty.Get("DB_HOST", false);
+            string port = EnviromentProperty.Get("DB_PORT", false);
+            string dbName = EnviromentProperty.Get("DB_NAME", false);
+            string dbUser = EnviromentProperty.Get("DB_USER", false);
+            string dbPass = EnviromentProperty.Get("DB_PASSWORD", false);
+
+            string connStr = $"Host={host};Port={port};Database={dbName};Username={dbUser};Password={dbPass}";
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
-            //builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            //builder.Services.AddOpenApi();
+            builder.Services.AddDbContext<PrimalConquestDbContext>(opts => opts.UseNpgsql(connStr));
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            using (var scope = app.Services.CreateScope())
             {
-                //app.MapOpenApi();
+                var db = scope.ServiceProvider.GetRequiredService<PrimalConquestDbContext>();
+                db.Database.Migrate();
             }
 
             app.UseHttpsRedirection();

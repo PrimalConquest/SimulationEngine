@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using SharedServices;
+using SharedServices.Source.Interfaces;
 using SimulationEngine.Source.Interfaces;
 using SimulationEngine.Source.Logistic;
 using SimulationEngine.Source.Systems;
