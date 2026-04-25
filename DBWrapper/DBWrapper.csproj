@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Comunication\AccountComunicatrion\AccountComunication.csproj" />
     <ProjectReference Include="..\Comunication\LoadoutComunication\LoadoutComunication.csproj" />
+    <ProjectReference Include="..\SharedServices\SharedServices.csproj" />
     <ProjectReference Include="..\SharedUtils\SharedUtils.csproj" />
   </ItemGroup>
 
