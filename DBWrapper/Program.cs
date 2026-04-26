@@ -87,8 +87,12 @@ namespace DBWrapper
                     p.AddRequirements(new InternalOnlyRequirement()));
             });
 
+            builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
+                p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+
             var app = builder.Build();
 
+            app.UseCors();
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();

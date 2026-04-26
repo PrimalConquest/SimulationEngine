@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Comunication/">
+    <Project Path="CommunicationShared/CommunicationShared.csproj" Id="c06c3fb0-b1c1-40e7-a801-10c156a7cf40" />
     <Project Path="Comunication/AccountComunicatrion/AccountComunication.csproj" />
     <Project Path="Comunication/BattleComunication/BattleComunication.csproj" />
     <Project Path="Comunication/LoadoutComunication/LoadoutComunication.csproj" />

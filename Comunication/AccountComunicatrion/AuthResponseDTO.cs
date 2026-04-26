@@ -1,6 +1,8 @@
+using CommunicationShared;
+
 namespace AccountComunication
 {
-    public class AuthResponseDTO
+    public class AuthResponseDTO : DTO<AuthResponseDTO>
     {
         public string AccessToken { get; set; } = "";
         public string RefreshToken { get; set; } = "";
