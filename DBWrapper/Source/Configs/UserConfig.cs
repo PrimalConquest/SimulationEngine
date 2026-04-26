@@ -1,4 +1,4 @@
-﻿using DBWrapper.Source.Models;
+using DBWrapper.Source.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,14 +8,15 @@ namespace DBWrapper.Source.Configs
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.ToTable("Users");
+            builder.Property(u => u.IsActive).HasDefaultValue(true);
 
-            builder.HasKey(l => l.Id);
-            builder.Property(l => l.Id).UseIdentityColumn();
+            builder.HasOne(u => u.Loadout)
+                .WithOne(l => l.User)
+                .HasForeignKey<UserLoadout>(l => l.UserId);
 
-            builder.Property(l => l.UserName).IsRequired().HasMaxLength(50);
-            builder.Property(l => l.Email).IsRequired().HasMaxLength(250);
-            builder.Property(l => l.Password).IsRequired();
+            builder.HasOne(u => u.Stats)
+                .WithOne(s => s.User)
+                .HasForeignKey<UserStats>(s => s.UserId);
         }
     }
 }

@@ -1,19 +1,18 @@
-﻿namespace DBWrapper.Source.Models
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DBWrapper.Source.Models
 {
-    public class UserInfo
+    public class UserLoadout
     {
         public int Id { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; } = "";
         public User User { get; set; } = null!;
 
-        public int RankPoints { get; set; } = 0;
-
         public string CommanderId { get; set; } = "";
-
         public string OfficerIdsRaw { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        [NotMapped]
         public List<string> OfficerIds
         {
             get => string.IsNullOrWhiteSpace(OfficerIdsRaw)

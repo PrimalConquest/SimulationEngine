@@ -1,13 +1,12 @@
-﻿namespace DBWrapper.Source.Models
-{
-    public class User
-    {
-        public int Id { get; set; }
-        public string UserName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-        public bool IsActive { get; set; }
+using Microsoft.AspNetCore.Identity;
 
-        public UserInfo? Info { get; set; }
+namespace DBWrapper.Source.Models
+{
+    public class User : IdentityUser
+    {
+        public bool IsActive { get; set; } = true;
+
+        public UserLoadout? Loadout { get; set; }
+        public UserStats? Stats { get; set; }
     }
 }

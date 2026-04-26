@@ -1,25 +1,26 @@
-﻿using LoadoutComunication;
+using AccountComunication;
+using DBWrapper.Source.Models;
 
 namespace DBWrapper.Source.Models.Mappers
 {
-    public class UserMapper : IDTOMapper<User, AccountDTO>
+    public class UserMapper : IDTOMapper<User, RegisterDTO>
     {
-        public static User FromDTO(AccountDTO DTO)
+        public static User FromDTO(RegisterDTO dto)
         {
-            User user = new();
-            user.UserName = DTO.UserName;
-            user.Password = DTO.Password;
-            user.Email = DTO.Email;
-            return user;
+            return new User
+            {
+                UserName = dto.UserName,
+                Email    = dto.Email
+            };
         }
 
-        public static AccountDTO ToDTO(User Model)
+        public static RegisterDTO ToDTO(User model)
         {
-            AccountDTO dto = new();
-            dto.UserName = Model.UserName;
-            dto.Password = Model.Password;
-            dto.Email = Model.Email;
-            return dto;
+            return new RegisterDTO
+            {
+                UserName = model.UserName ?? "",
+                Email    = model.Email    ?? "",
+            };
         }
     }
 }
