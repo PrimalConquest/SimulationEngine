@@ -36,8 +36,6 @@ namespace Matchmaking
             })
             .AddJwtBearer(o =>
             {
-                // Keep claim names exactly as written in the JWT ("sub", "unique_name", etc.)
-                // so FindFirstValue(JwtRegisteredClaimNames.Sub) works as expected.
                 o.MapInboundClaims = false;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -49,14 +47,13 @@ namespace Matchmaking
                     ValidAudience            = jwtAudience,
                     IssuerSigningKey         = signingKey,
                 };
-                // SignalR passes the JWT as ?access_token=... in the WebSocket upgrade request.
+
                 o.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = ctx =>
                     {
                         var token = ctx.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(token) &&
-                            ctx.Request.Path.StartsWithSegments("/queue"))
+                        if (!string.IsNullOrEmpty(token))
                             ctx.Token = token;
                         return Task.CompletedTask;
                     }

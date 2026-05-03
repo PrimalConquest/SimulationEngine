@@ -292,20 +292,27 @@ namespace DBWrapper
             })
             .RequireAuthorization(InternalOrJwtRequirement.Policy);
 
-            // Only internal services (BattleServer after match) can write rank
-            app.MapPut("/stats/{userId}", async (
-                string userId,
-                UserStatsDTO dto,
+            // Called by BattleServer at match end — atomically updates both players' rank.
+            app.MapPost("/stats/match-result", async (
+                MatchResultDTO dto,
                 PrimalConquestDbContext db) =>
             {
-                var stats = await db.UserStats.FirstOrDefaultAsync(x => x.UserId == userId);
-                if (stats is null)
-                    return Results.NotFound($"No stats for player '{userId}'");
+                var winner = await db.UserStats.FirstOrDefaultAsync(x => x.UserId == dto.WinnerId);
+                var loser  = await db.UserStats.FirstOrDefaultAsync(x => x.UserId == dto.LoserId);
 
-                stats.RankPoints = dto.RankPoints;
+                if (winner is null) return Results.NotFound($"No stats for winner '{dto.WinnerId}'");
+                if (loser  is null) return Results.NotFound($"No stats for loser '{dto.LoserId}'");
+
+                int relativePoints = 50;
+                int winnerPoints = relativePoints * (loser.RankPoints / winner.RankPoints);
+                int loserPoints = relativePoints * (winner.RankPoints / loser.RankPoints);
+
+
+                winner.RankPoints += winnerPoints;
+                loser.RankPoints   = Math.Max(0, loser.RankPoints - (loserPoints));
                 await db.SaveChangesAsync();
 
-                return Results.Ok(UserStatsMapper.ToDTO(stats));
+                return Results.Ok();
             })
             .RequireAuthorization(InternalOnlyRequirement.Policy);
 

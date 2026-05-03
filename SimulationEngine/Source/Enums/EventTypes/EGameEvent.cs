@@ -7,6 +7,7 @@ namespace SimulationEngine.Source.Enums.EventTypes
     public enum EGameEvent
     {
         TurnStart,
-        TurnEnd
+        TurnEnd,
+        GameOver,
     }
 }

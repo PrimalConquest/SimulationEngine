@@ -23,7 +23,8 @@ namespace Matchmaking.Source.Hubs
         // Player calls this after connecting to enter the matchmaking pool.
         public async Task JoinQueue()
         {
-            var userId = Context.User!.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+            var userId   = Context.User!.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+            var userName = Context.User!.FindFirstValue(JwtRegisteredClaimNames.UniqueName) ?? userId;
 
             var (stats, err) = await _db.GetStats(userId);
             if (err != null)
@@ -35,6 +36,7 @@ namespace Matchmaking.Source.Hubs
             _queue.Enqueue(new QueueEntry
             {
                 UserId       = userId,
+                UserName     = userName,
                 ConnectionId = Context.ConnectionId,
                 RankPoints   = stats!.RankPoints,
                 QueuedAt     = DateTime.UtcNow,

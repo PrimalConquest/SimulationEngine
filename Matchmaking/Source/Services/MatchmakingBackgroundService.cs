@@ -101,8 +101,10 @@ namespace Matchmaking.Source.Services
             var annotations = new Dictionary<string, string>
             {
                 ["player1-id"]      = a.UserId,
-                ["player2-id"]      = b.UserId,
+                ["player1-name"]    = a.UserName,
                 ["player1-loadout"] = JsonConvert.SerializeObject(loadoutA),
+                ["player2-id"]      = b.UserId,
+                ["player2-name"]    = b.UserName,
                 ["player2-loadout"] = JsonConvert.SerializeObject(loadoutB),
             };
 

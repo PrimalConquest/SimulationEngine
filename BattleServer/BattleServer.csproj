@@ -9,12 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Comunication\BattleComunication\BattleComunication.csproj" />
+    <ProjectReference Include="..\Comunication\LoadoutComunication\LoadoutComunication.csproj" />
   </ItemGroup>
 
     <Target Name="DockerBuildAndPush" AfterTargets="Build" Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">
