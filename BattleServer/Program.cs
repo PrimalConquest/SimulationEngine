@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SimulationEngine.Source.Data.Geometry;
 using SimulationEngine.Source.Logistic;
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace BattleServer
@@ -76,6 +77,7 @@ namespace BattleServer
             Game game = new(2, new Cell(7, 7));
             game.InitGame();
             builder.Services.AddSingleton(game);
+            builder.Services.AddSingleton<ConcurrentDictionary<string, int>>();
 
             var app = builder.Build();
 

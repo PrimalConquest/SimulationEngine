@@ -1,12 +1,18 @@
+using BattleComunication;
 using BattleComunication.Interfaces;
+using BattleServer.Source.Mappers;
 using BattleServer.Source.Services;
 using LoadoutComunication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SimulationEngine.Source.Interfaces;
+using SimulationEngine.Source.Data.Geometry;
+using SimulationEngine.Source.Enums;
+using SimulationEngine.Source.Factories.Commands;
+using SimulationEngine.Source.Factories.Commands.CommandInfos;
 using SimulationEngine.Source.Logistic;
+using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -15,17 +21,24 @@ namespace BattleServer.Source.Hubs
     [Authorize]
     public class SimulationHub : Hub<ISimulationClient>, ISimulationHub
     {
-        readonly Game            _game;
-        readonly AgonesService   _agones;
-        readonly DbWrapperClient _db;
-        readonly ILogger<SimulationHub> _log;
+        readonly Game                              _game;
+        readonly AgonesService                     _agones;
+        readonly DbWrapperClient                   _db;
+        readonly ILogger<SimulationHub>            _log;
+        readonly ConcurrentDictionary<string, int> _playerIndexByUserId;
 
-        public SimulationHub(Game game, AgonesService agones, DbWrapperClient db, ILogger<SimulationHub> log)
+        public SimulationHub(
+            Game                              game,
+            AgonesService                     agones,
+            DbWrapperClient                   db,
+            ILogger<SimulationHub>            log,
+            ConcurrentDictionary<string, int> playerIndexByUserId)
         {
-            _game   = game;
-            _agones = agones;
-            _db     = db;
-            _log    = log;
+            _game                = game;
+            _agones              = agones;
+            _db                  = db;
+            _log                 = log;
+            _playerIndexByUserId = playerIndexByUserId;
         }
 
         public override async Task OnConnectedAsync()
@@ -61,23 +74,92 @@ namespace BattleServer.Source.Hubs
             }
 
             _game.RegisterPlayer(playerName, loadout.CommanderId, new HashSet<string>(loadout.OfficerIds));
-            _log.LogInformation("Registered {Name} ({UserId})", playerName, userId);
 
-            StartGame();
+            int playerIndex = _game.Players.Count - 1;
+            _playerIndexByUserId[userId] = playerIndex;
+            _log.LogInformation("Registered {Name} ({UserId}) as player index {Index}", playerName, userId, playerIndex);
+
+            if (_game.CanStart)
+            {
+                _log.LogInformation("Both players connected — starting game");
+                _game.Play();
+                await Clients.All.ReceiveGameSetup(GameStateMapper.From(_game));
+            }
 
             await base.OnConnectedAsync();
         }
 
-        public bool SendCommand(ICommandInfo info)
+        // ── Command handlers ──────────────────────────────────────────────────────
+
+        public async Task SendMoveCommand(int x, int y, int direction)
         {
-            // TODO: route command to the correct player via _game and check for game over.
-            // When the SimulationEngine raises EGameEvent.GameOver, call:
-            //   await ReportMatchResultAsync(winnerId, loserId);
-            return true;
+            var player = GetActivePlayerForCaller();
+            if (player == null) { await Clients.Caller.ReceiveError("Not your turn"); return; }
+
+            var info    = new MoveCommandInfo { Position = new Cell(x, y), Direction = (EDirection)direction };
+            var command = CommandFactory.Get(player, info);
+            if (command == null || !command.CanExecute())
+            {
+                await Clients.Caller.ReceiveError("Invalid move command");
+                return;
+            }
+
+            command.Execute();
+            await Clients.All.ReceiveGameState(GameStateMapper.From(_game));
         }
 
-        // Called once the SimulationEngine determines the match outcome.
-        // Updates RankPoints in DBWrapper then shuts down this GameServer pod.
+        public async Task SendActivateCommand(string unitKey)
+        {
+            var player = GetActivePlayerForCaller();
+            if (player == null) { await Clients.Caller.ReceiveError("Not your turn"); return; }
+
+            var info    = new ActivateSpecialCommandInfo { UnitId = unitKey };
+            var command = CommandFactory.Get(player, info);
+            if (command == null || !command.CanExecute())
+            {
+                await Clients.Caller.ReceiveError("Cannot activate unit");
+                return;
+            }
+
+            command.Execute();
+            await Clients.All.ReceiveGameState(GameStateMapper.From(_game));
+        }
+
+        public async Task SendPlaceCommand(string unitKey, int x, int y)
+        {
+            var player = GetActivePlayerForCaller();
+            if (player == null) { await Clients.Caller.ReceiveError("Not your turn"); return; }
+
+            var info    = new PlaceSpecialCommandInfo { UnitId = unitKey, Position = new Cell(x, y) };
+            var command = CommandFactory.Get(player, info);
+            if (command == null || !command.CanExecute())
+            {
+                await Clients.Caller.ReceiveError("Cannot place unit there");
+                return;
+            }
+
+            command.Execute();
+            await Clients.All.ReceiveGameState(GameStateMapper.From(_game));
+        }
+
+        public async Task SendEndTurn()
+        {
+            var player = GetActivePlayerForCaller();
+            if (player == null) { await Clients.Caller.ReceiveError("Not your turn"); return; }
+
+            var command = CommandFactory.Get(player, new EndTurnCommandInfo());
+            if (command == null || !command.CanExecute())
+            {
+                await Clients.Caller.ReceiveError("Cannot end turn");
+                return;
+            }
+
+            command.Execute();
+            await Clients.All.ReceiveGameState(GameStateMapper.From(_game));
+        }
+
+        // ── Match result ──────────────────────────────────────────────────────────
+
         public async Task ReportMatchResultAsync(string winnerId, string loserId)
         {
             var err = await _db.PostMatchResultAsync(winnerId, loserId);
@@ -87,16 +169,14 @@ namespace BattleServer.Source.Hubs
             await _agones.ShutdownAsync();
         }
 
-        public void StartGame()
-        {
-            if (!_game.CanStart)
-            {
-                _log.LogInformation("Still cannot start game...");
-                return;
-            }
+        // ── Helpers ───────────────────────────────────────────────────────────────
 
-            _log.LogInformation("Both players connected — starting game");
-            _game.Play();
+        Player? GetActivePlayerForCaller()
+        {
+            var userId = Context.User!.FindFirstValue(JwtRegisteredClaimNames.Sub)!;
+            if (!_playerIndexByUserId.TryGetValue(userId, out int idx)) return null;
+            if (_game.ActivePlayer != idx) return null;
+            return _game.Players[idx].Key;
         }
     }
 }

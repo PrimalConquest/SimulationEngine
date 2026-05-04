@@ -12,8 +12,10 @@ namespace SimulationEngine.Source.Factories.Commands
     {
         public static IGameCommand? Get(Player player, ICommandInfo commandInfo) => commandInfo switch
         {
-            MoveCommandInfo moveCommandInfo => new MoveCommand(player, moveCommandInfo),
-
+            MoveCommandInfo            m => new MoveCommand(player, m),
+            ActivateSpecialCommandInfo a => new ActivateSpecial(player, a),
+            PlaceSpecialCommandInfo    p => new PlaceSpecialUnit(player, p),
+            EndTurnCommandInfo         e => new EndTurn(player, e),
             _ => null
         };
     }

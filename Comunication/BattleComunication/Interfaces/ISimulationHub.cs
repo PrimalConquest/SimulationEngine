@@ -1,15 +1,13 @@
-﻿using SimulationEngine.Source.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BattleComunication.Interfaces
 {
     public interface ISimulationHub
     {
-        bool SendCommand(ICommandInfo info);
+        Task SendMoveCommand(int x, int y, int direction);
+        Task SendActivateCommand(string unitKey);
+        Task SendPlaceCommand(string unitKey, int x, int y);
+        Task SendEndTurn();
         Task ReportMatchResultAsync(string winnerId, string loserId);
-        void StartGame();
     }
 }

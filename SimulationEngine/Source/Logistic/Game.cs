@@ -18,7 +18,7 @@ namespace SimulationEngine.Source.Logistic
         int _numPlayers;
         bool _initilized;
         Cell _boardSize;
-        int ActivePlayer { get; set; }
+        public int ActivePlayer { get; set; }
 
         public List<KeyValuePair<Player, string>> Players { get; private set; }
         public Player CurrentPlayer { get { return Players[ActivePlayer].Key; }  }

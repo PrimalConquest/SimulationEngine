@@ -1,13 +1,11 @@
-﻿using SimulationEngine.Source.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace BattleComunication.Interfaces
 {
     public interface ISimulationClient
     {
-        bool RecieveCommand(ICommandInfo info);
-        void ReceiveGameSetup();
+        Task ReceiveGameSetup(GameStateDTO state);
+        Task ReceiveGameState(GameStateDTO state);
+        Task ReceiveError(string message);
     }
 }
