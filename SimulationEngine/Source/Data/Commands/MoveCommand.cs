@@ -33,13 +33,13 @@ namespace SimulationEngine.Source.Data.Commands
             }
             //_maxRepetitions = unit.GetStat(EStat.MoveSpeed);
             _maxRepetitions = 1;//////////
-            //_moveCost = unit.GetStat(EStat.MoveCost);
+            _moveCost = 1;// unit.GetStat(EStat.MoveCost);
         }
 
         public bool CanExecute()
         {
-            //if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
-            //if (_player.CurrentMoves < _moveCost) return false;
+            if (SimulationSystem.ActiveGame.CurrentPlayer != _player) return false;
+            if (_player.CurrentMoves < _moveCost) return false;
 
             //_player.BoardUnits.TryGetValue(_movingUnit, out Unit unit);
             return _movingUnit != null;
@@ -58,9 +58,10 @@ namespace SimulationEngine.Source.Data.Commands
             if (moveStack == null)
             {
                 _player.Board.RollbackPositions(boardSnapshot);
-            }
-            _moveCost = 0;
 
+                _moveCost = 0;
+            }
+            _player.CurrentMoves -= _moveCost;
             //_player.BoardUnits.TryGetValue(_movingUnit, out Unit unit);
             //if (unit == null) return;
 

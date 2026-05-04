@@ -11,5 +11,7 @@ namespace BattleComunication
         public int    MaxEnergy      { get; set; }
         public int    ActivationCost { get; set; }
         public bool   CanActivate    { get; set; }
+        public int    ShapeWidth     { get; set; } = 1;
+        public int    ShapeHeight    { get; set; } = 1;
     }
 }

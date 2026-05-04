@@ -79,6 +79,8 @@ namespace BattleServer.Source.Hubs
             _playerIndexByUserId[userId] = playerIndex;
             _log.LogInformation("Registered {Name} ({UserId}) as player index {Index}", playerName, userId, playerIndex);
 
+            await Clients.Caller.ReceivePlayerIndex(playerIndex);
+
             if (_game.CanStart)
             {
                 _log.LogInformation("Both players connected — starting game");
